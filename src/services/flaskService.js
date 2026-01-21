@@ -2,7 +2,7 @@ import { fetchAuthSession } from 'aws-amplify/auth';
 
 class FlaskService {
   constructor() {
-    this.baseUrl = process.env.REACT_APP_FLASK_SERVICE_URL || '/api/flask';
+    this.baseUrl = import.meta.env.VITE_FLASK_SERVICE_URL;
   }
 
   async getAuthHeaders() {
