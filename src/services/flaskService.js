@@ -3,6 +3,19 @@ import { fetchAuthSession } from 'aws-amplify/auth';
 class FlaskService {
   constructor() {
     this.baseUrl = import.meta.env.VITE_FLASK_SERVICE_URL;
+    this.partitionKey =
+      typeof window !== 'undefined' ? window.localStorage.getItem('partition_key') : null;
+  }
+
+  setPartitionKey(partitionKey) {
+    this.partitionKey = partitionKey;
+    if (typeof window !== 'undefined') {
+      if (partitionKey) {
+        window.localStorage.setItem('partition_key', partitionKey);
+      } else {
+        window.localStorage.removeItem('partition_key');
+      }
+    }
   }
 
   async getAuthHeaders() {
@@ -23,11 +36,13 @@ class FlaskService {
   async makeRequest(endpoint, options = {}) {
     try {
       const headers = await this.getAuthHeaders();
+      const partitionKey = options.partitionKey || this.partitionKey;
       
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         ...options,
         headers: {
           ...headers,
+          ...(partitionKey ? { 'X-Partition-Key': partitionKey } : {}),
           ...options.headers,
         },
       });
