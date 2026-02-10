@@ -1,75 +1,294 @@
 import { fetchAuthSession } from 'aws-amplify/auth'
+import type {
+  AcquireLockResponse,
+  AddRoleInput,
+  AddRoleResponse,
+  AuthMeResponse,
+  CreateChildInput,
+  CreateParentInput,
+  CreateSpouseInput,
+  CreateTreeInput,
+  CreateTreeResponse,
+  DirectRelations,
+  ListRolesResponse,
+  ListTreesResponse,
+  LockStatusResponse,
+  Member,
+  PicUploadResponse,
+  PicUrlResponse,
+  PhotosUploadResponse,
+  PhotosUrlsResponse,
+  ReleaseLockResponse,
+  RemoveRoleInput,
+  RemoveRoleResponse,
+  UpdateMemberInput,
+  UpdateSpouseRelationInput,
+} from '@/types'
 
-interface RequestOptions extends Omit<RequestInit, 'headers'> {
-  partitionKey?: string
-  headers?: Record<string, string>
+// ─── Core HTTP client ────────────────────────────────────────────────────────
+
+const BASE_URL = import.meta.env.VITE_FLASK_API_URL || ''
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const session = await fetchAuthSession()
+  const token = session.tokens?.idToken?.toString()
+  if (!token) throw new Error('Authentication required')
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  }
 }
 
-class FlaskService {
-  private baseUrl: string
-  private partitionKey: string | null
+interface RequestOptions {
+  method?: string
+  body?: unknown
+  partitionKey?: string
+  /** Set to true for multipart/form-data requests (Content-Type omitted) */
+  isFormData?: boolean
+}
 
-  constructor() {
-    this.baseUrl = import.meta.env.VITE_FLASK_API_URL || ''
-    this.partitionKey =
-      typeof window !== 'undefined'
-        ? window.localStorage.getItem('partition_key')
-        : null
+async function request<T>(endpoint: string, opts: RequestOptions = {}): Promise<T> {
+  const headers = await getAuthHeaders()
+
+  if (opts.partitionKey) {
+    headers['X-Partition-Key'] = opts.partitionKey
   }
 
-  setPartitionKey(partitionKey: string | null) {
-    this.partitionKey = partitionKey
-    if (typeof window !== 'undefined') {
-      if (partitionKey) {
-        window.localStorage.setItem('partition_key', partitionKey)
-      } else {
-        window.localStorage.removeItem('partition_key')
-      }
-    }
+  // For FormData, remove Content-Type so the browser sets the boundary
+  if (opts.isFormData) {
+    delete headers['Content-Type']
   }
 
-  private async getAuthHeaders(): Promise<Record<string, string>> {
-    const session = await fetchAuthSession()
-    const token = session.tokens?.idToken?.toString()
+  const response = await fetch(`${BASE_URL}${endpoint}`, {
+    method: opts.method ?? 'GET',
+    headers,
+    body: opts.isFormData
+      ? (opts.body as FormData)
+      : opts.body
+        ? JSON.stringify(opts.body)
+        : undefined,
+  })
 
-    if (!token) {
-      throw new Error('Authentication required')
-    }
-
-    return {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    }
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    const message = (body as Record<string, string>)?.error || `HTTP ${response.status}`
+    throw new Error(message)
   }
 
-  async makeRequest<T = unknown>(
-    endpoint: string,
-    options: RequestOptions = {},
-  ): Promise<T> {
-    const headers = await this.getAuthHeaders()
-    const partitionKey = options.partitionKey || this.partitionKey
-
-    const { partitionKey: _pk, headers: extraHeaders, ...fetchOptions } = options
-
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      ...fetchOptions,
-      headers: {
-        ...headers,
-        ...(partitionKey ? { 'X-Partition-Key': partitionKey } : {}),
-        ...extraHeaders,
-      },
-    })
-
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}))
-      const message =
-        (body as Record<string, string>)?.error ||
-        `HTTP ${response.status}`
-      throw new Error(message)
-    }
-
+  // Some endpoints return plain text (e.g. update spouse relation)
+  const contentType = response.headers.get('content-type') ?? ''
+  if (contentType.includes('application/json')) {
     return response.json() as Promise<T>
   }
+  return (await response.text()) as unknown as T
 }
 
-export const flaskService = new FlaskService()
+// ─── Partition key helpers ───────────────────────────────────────────────────
+
+let _partitionKey: string | null =
+  typeof window !== 'undefined'
+    ? window.localStorage.getItem('partition_key')
+    : null
+
+export function getPartitionKey(): string | null {
+  return _partitionKey
+}
+
+export function setPartitionKey(key: string | null) {
+  _partitionKey = key
+  if (typeof window !== 'undefined') {
+    if (key) {
+      window.localStorage.setItem('partition_key', key)
+    } else {
+      window.localStorage.removeItem('partition_key')
+    }
+  }
+}
+
+/** Shorthand: add current partition key to request options */
+function withPartition(opts: RequestOptions = {}): RequestOptions {
+  const pk = opts.partitionKey ?? _partitionKey
+  if (!pk) throw new Error('No partition key set — select a tree first')
+  return { ...opts, partitionKey: pk }
+}
+
+// ─── Auth ────────────────────────────────────────────────────────────────────
+
+export const authApi = {
+  me: () => request<AuthMeResponse>('/auth/me'),
+
+  deleteAccount: () =>
+    request<{ message: string }>('/account', { method: 'DELETE' }),
+}
+
+// ─── Trees ───────────────────────────────────────────────────────────────────
+
+export const treesApi = {
+  list: () => request<ListTreesResponse>('/trees'),
+
+  create: (input: CreateTreeInput) =>
+    request<CreateTreeResponse>('/trees', {
+      method: 'POST',
+      body: input,
+    }),
+
+  delete: () =>
+    request<{ message: string }>('/trees', {
+      ...withPartition(),
+      method: 'DELETE',
+    }),
+}
+
+// ─── Members ─────────────────────────────────────────────────────────────────
+
+export const membersApi = {
+  get: (id: string) =>
+    request<Member>(`/member?id=${encodeURIComponent(id)}`, withPartition()),
+
+  list: () =>
+    request<Member[]>('/members', withPartition()),
+
+  update: (input: UpdateMemberInput) =>
+    request<Member>('/member', {
+      ...withPartition(),
+      method: 'PUT',
+      body: input,
+    }),
+
+  delete: (memberId: string) =>
+    request<{ message: string }>('/member', {
+      ...withPartition(),
+      method: 'DELETE',
+      body: { member_id: memberId },
+    }),
+
+  directRelations: (id: string) =>
+    request<DirectRelations>(
+      `/memberDirectRelations?id=${encodeURIComponent(id)}`,
+      withPartition(),
+    ),
+}
+
+// ─── Composed member endpoints ───────────────────────────────────────────────
+
+export const relationsApi = {
+  createChild: (input: CreateChildInput) =>
+    request<Member>('/child', {
+      ...withPartition(),
+      method: 'POST',
+      body: input,
+    }),
+
+  createParent: (input: CreateParentInput) =>
+    request<Member>('/parent', {
+      ...withPartition(),
+      method: 'POST',
+      body: input,
+    }),
+
+  createSpouse: (input: CreateSpouseInput) =>
+    request<Member>('/spouse', {
+      ...withPartition(),
+      method: 'POST',
+      body: input,
+    }),
+
+  updateSpouseRelation: (input: UpdateSpouseRelationInput) =>
+    request<string>('/spouse', {
+      ...withPartition(),
+      method: 'PUT',
+      body: input,
+    }),
+}
+
+// ─── Roles / ACL ─────────────────────────────────────────────────────────────
+
+export const rolesApi = {
+  list: () =>
+    request<ListRolesResponse>('/roles', withPartition()),
+
+  add: (input: AddRoleInput) =>
+    request<AddRoleResponse>('/roles', {
+      ...withPartition(),
+      method: 'POST',
+      body: input,
+    }),
+
+  remove: (input: RemoveRoleInput) =>
+    request<RemoveRoleResponse>('/roles', {
+      ...withPartition(),
+      method: 'DELETE',
+      body: input,
+    }),
+}
+
+// ─── Editor Lock ─────────────────────────────────────────────────────────────
+
+export const editorLockApi = {
+  status: () =>
+    request<LockStatusResponse>('/editor-lock', withPartition()),
+
+  acquire: () =>
+    request<AcquireLockResponse>('/editor-lock', {
+      ...withPartition(),
+      method: 'POST',
+    }),
+
+  release: () =>
+    request<ReleaseLockResponse>('/editor-lock', {
+      ...withPartition(),
+      method: 'DELETE',
+    }),
+
+  forceRelease: () =>
+    request<ReleaseLockResponse>('/editor-lock/force', {
+      ...withPartition(),
+      method: 'POST',
+    }),
+}
+
+// ─── Media ───────────────────────────────────────────────────────────────────
+
+export const mediaApi = {
+  uploadPic: (memberId: string, file: File) => {
+    const form = new FormData()
+    form.append('member_id', memberId)
+    form.append('file', file)
+    return request<PicUploadResponse>('/member/pic', {
+      ...withPartition(),
+      method: 'POST',
+      body: form,
+      isFormData: true,
+    })
+  },
+
+  uploadPhotos: (memberId: string, files: File[]) => {
+    const form = new FormData()
+    form.append('member_id', memberId)
+    files.forEach((f) => form.append('files[]', f))
+    return request<PhotosUploadResponse>('/member/photos', {
+      ...withPartition(),
+      method: 'POST',
+      body: form,
+      isFormData: true,
+    })
+  },
+
+  getPicUrl: (memberId: string, expiresIn?: number) => {
+    const params = new URLSearchParams({ member_id: memberId })
+    if (expiresIn) params.set('expires_in', String(expiresIn))
+    return request<PicUrlResponse>(
+      `/member/pic-url?${params}`,
+      withPartition(),
+    )
+  },
+
+  getPhotosUrls: (memberId: string, expiresIn?: number) => {
+    const params = new URLSearchParams({ member_id: memberId })
+    if (expiresIn) params.set('expires_in', String(expiresIn))
+    return request<PhotosUrlsResponse>(
+      `/member/photos-urls?${params}`,
+      withPartition(),
+    )
+  },
+}
