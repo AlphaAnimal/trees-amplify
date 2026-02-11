@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { setPartitionKey } from '@/services/flaskService'
 import type { TreeSummary, Role } from '@/types'
 
 const roleBadge: Record<Role, { label: string; className: string }> = {
@@ -23,6 +24,9 @@ export default function TreeCard({ tree }: { tree: TreeSummary }) {
     <Link
       to="/tree/$treeId"
       params={{ treeId: tree.tree_id }}
+      onClick={() => {
+        if (tree.partition_key) setPartitionKey(tree.partition_key)
+      }}
       className="block rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md hover:border-gray-300 transition-all overflow-hidden"
     >
       {/* Image banner */}
