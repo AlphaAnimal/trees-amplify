@@ -14,6 +14,7 @@ import {
   authApi,
   setPartitionKey,
 } from '@/services/flaskService'
+import { useEditorLockWrapper } from './useEditorLockWrapper'
 import type {
   AddRoleInput,
   CreateChildInput,
@@ -144,14 +145,24 @@ export function useDirectRelations(
 
 export function useUpdateMember(partitionKey: string | null) {
   const qc = useQueryClient()
+  const lockWrapper = useEditorLockWrapper(partitionKey, (input: UpdateMemberInput) =>
+    membersApi.update(input),
+  )
+
   return useMutation({
-    mutationFn: (input: UpdateMemberInput) => membersApi.update(input),
+    mutationFn: lockWrapper,
     onSuccess: (_data, variables) => {
       if (partitionKey) {
         qc.invalidateQueries({
           queryKey: queryKeys.member(partitionKey, variables.id),
         })
         qc.invalidateQueries({ queryKey: queryKeys.members(partitionKey) })
+        // Invalidate all directRelations queries to refresh tree view
+        qc.invalidateQueries({
+          predicate: (query) =>
+            query.queryKey[0] === 'directRelations' &&
+            query.queryKey[1] === partitionKey,
+        })
       }
     },
   })
@@ -159,8 +170,12 @@ export function useUpdateMember(partitionKey: string | null) {
 
 export function useDeleteMember(partitionKey: string | null) {
   const qc = useQueryClient()
+  const lockWrapper = useEditorLockWrapper(partitionKey, (memberId: string) =>
+    membersApi.delete(memberId),
+  )
+
   return useMutation({
-    mutationFn: (memberId: string) => membersApi.delete(memberId),
+    mutationFn: lockWrapper,
     onSuccess: () => {
       if (partitionKey) {
         qc.invalidateQueries({ queryKey: queryKeys.members(partitionKey) })
@@ -174,11 +189,21 @@ export function useDeleteMember(partitionKey: string | null) {
 
 export function useCreateChild(partitionKey: string | null) {
   const qc = useQueryClient()
+  const lockWrapper = useEditorLockWrapper(partitionKey, (input: CreateChildInput) =>
+    relationsApi.createChild(input),
+  )
+
   return useMutation({
-    mutationFn: (input: CreateChildInput) => relationsApi.createChild(input),
+    mutationFn: lockWrapper,
     onSuccess: () => {
       if (partitionKey) {
         qc.invalidateQueries({ queryKey: queryKeys.members(partitionKey) })
+        // Invalidate all directRelations queries to refresh tree view
+        qc.invalidateQueries({
+          predicate: (query) =>
+            query.queryKey[0] === 'directRelations' &&
+            query.queryKey[1] === partitionKey,
+        })
       }
     },
   })
@@ -186,11 +211,21 @@ export function useCreateChild(partitionKey: string | null) {
 
 export function useCreateParent(partitionKey: string | null) {
   const qc = useQueryClient()
+  const lockWrapper = useEditorLockWrapper(partitionKey, (input: CreateParentInput) =>
+    relationsApi.createParent(input),
+  )
+
   return useMutation({
-    mutationFn: (input: CreateParentInput) => relationsApi.createParent(input),
+    mutationFn: lockWrapper,
     onSuccess: () => {
       if (partitionKey) {
         qc.invalidateQueries({ queryKey: queryKeys.members(partitionKey) })
+        // Invalidate all directRelations queries to refresh tree view
+        qc.invalidateQueries({
+          predicate: (query) =>
+            query.queryKey[0] === 'directRelations' &&
+            query.queryKey[1] === partitionKey,
+        })
       }
     },
   })
@@ -198,11 +233,21 @@ export function useCreateParent(partitionKey: string | null) {
 
 export function useCreateSpouse(partitionKey: string | null) {
   const qc = useQueryClient()
+  const lockWrapper = useEditorLockWrapper(partitionKey, (input: CreateSpouseInput) =>
+    relationsApi.createSpouse(input),
+  )
+
   return useMutation({
-    mutationFn: (input: CreateSpouseInput) => relationsApi.createSpouse(input),
+    mutationFn: lockWrapper,
     onSuccess: () => {
       if (partitionKey) {
         qc.invalidateQueries({ queryKey: queryKeys.members(partitionKey) })
+        // Invalidate all directRelations queries to refresh tree view
+        qc.invalidateQueries({
+          predicate: (query) =>
+            query.queryKey[0] === 'directRelations' &&
+            query.queryKey[1] === partitionKey,
+        })
       }
     },
   })
@@ -210,9 +255,13 @@ export function useCreateSpouse(partitionKey: string | null) {
 
 export function useUpdateSpouseRelation(partitionKey: string | null) {
   const qc = useQueryClient()
+  const lockWrapper = useEditorLockWrapper(
+    partitionKey,
+    (input: UpdateSpouseRelationInput) => relationsApi.updateSpouseRelation(input),
+  )
+
   return useMutation({
-    mutationFn: (input: UpdateSpouseRelationInput) =>
-      relationsApi.updateSpouseRelation(input),
+    mutationFn: lockWrapper,
     onSuccess: () => {
       if (partitionKey) {
         qc.invalidateQueries({ queryKey: queryKeys.members(partitionKey) })

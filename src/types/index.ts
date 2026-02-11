@@ -94,6 +94,7 @@ export interface RoleEntry {
   userId: string
   role: Role
   createdAt: string
+  email?: string | null
 }
 
 export interface ListRolesResponse {

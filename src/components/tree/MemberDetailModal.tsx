@@ -1,13 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useMember, usePicUrl, usePhotosUrls } from '@/hooks/useTreesApi'
 import { getPartitionKey } from '@/services/flaskService'
-import type { Member } from '@/types'
 
 interface Props {
   readonly open: boolean
   readonly onClose: () => void
   readonly memberId: string | null
-  readonly onViewInTree?: () => void
   readonly onEdit?: () => void
   readonly onAddChild?: () => void
   readonly onAddParent?: () => void
@@ -39,7 +37,6 @@ export default function MemberDetailModal({
   open,
   onClose,
   memberId,
-  onViewInTree,
   onEdit,
   onAddChild,
   onAddParent,
@@ -51,6 +48,20 @@ export default function MemberDetailModal({
   const { data: photosData, isLoading: photosLoading } = usePhotosUrls(partitionKey, memberId)
 
   const [imageError, setImageError] = useState<string | null>(null)
+
+  // ─── Escape key handler ───────────────────────────────────────────────
+  useEffect(() => {
+    if (!open) return
+
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [open, onClose])
 
   if (!open || !memberId) return null
 
@@ -75,7 +86,7 @@ export default function MemberDetailModal({
           <h2 className="text-xl font-semibold text-gray-900">Member Details</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
             aria-label="Close"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -220,29 +231,18 @@ export default function MemberDetailModal({
         </div>
 
         {/* ── Action Buttons ─────────────────────────────────────────── */}
-        {(onViewInTree || onEdit || onAddChild || onAddParent || onAddSpouse) && (
+        {(onEdit || onAddChild || onAddParent || onAddSpouse) && (
           <div className="border-t border-gray-200 px-6 py-4 shrink-0">
             <div className="flex flex-wrap items-center gap-3">
-              {onViewInTree && (
-                <button
-                  onClick={() => {
-                    onViewInTree()
-                    onClose()
-                  }}
-                  className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
-                >
-                  View in Tree
-                </button>
-              )}
               {onEdit && (
                 <button
                   onClick={() => {
                     onEdit()
                     onClose()
                   }}
-                  className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors cursor-pointer"
                 >
-                  Edit Member
+                  Edit
                 </button>
               )}
               {onAddChild && (
@@ -251,7 +251,7 @@ export default function MemberDetailModal({
                     onAddChild()
                     onClose()
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
                 >
                   Add Child
                 </button>
@@ -262,7 +262,7 @@ export default function MemberDetailModal({
                     onAddParent()
                     onClose()
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
                 >
                   Add Parent
                 </button>
@@ -273,7 +273,7 @@ export default function MemberDetailModal({
                     onAddSpouse()
                     onClose()
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
                 >
                   Add Spouse
                 </button>

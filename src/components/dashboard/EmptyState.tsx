@@ -28,7 +28,7 @@ export default function EmptyState({ onCreateTree }: { onCreateTree: () => void 
 
       <button
         onClick={onCreateTree}
-        className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow-sm"
+        className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow-sm cursor-pointer"
       >
         Create Your First Tree
       </button>

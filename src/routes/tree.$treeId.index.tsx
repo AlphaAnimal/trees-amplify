@@ -7,6 +7,7 @@ import MemberCard from '@/components/tree/MemberCard'
 import MemberSearch from '@/components/tree/MemberSearch'
 import DeleteTreeModal from '@/components/tree/DeleteTreeModal'
 import MemberDetailModal from '@/components/tree/MemberDetailModal'
+import MemberFormModal from '@/components/tree/MemberFormModal'
 
 export const Route = createRoute({
   getParentRoute: () => treeRoute,
@@ -24,6 +25,10 @@ function TreeViewPage() {
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [detailModalMemberId, setDetailModalMemberId] = useState<string | null>(null)
+  const [formModalMode, setFormModalMode] = useState<
+    'create-child' | 'create-parent' | 'create-spouse' | 'edit' | null
+  >(null)
+  const [formModalRelatedId, setFormModalRelatedId] = useState<string | undefined>(undefined)
 
   // ─── Tree info ────────────────────────────────────────────────────
   const { data: treesData } = useTrees()
@@ -151,7 +156,7 @@ function TreeViewPage() {
           {isOwner && (
             <button
               onClick={() => setShowDeleteModal(true)}
-              className="text-sm text-red-500 hover:text-red-700 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors shrink-0"
+              className="text-sm text-red-500 hover:text-red-700 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors shrink-0 cursor-pointer"
             >
               <svg
                 className="w-4 h-4"
@@ -200,7 +205,8 @@ function TreeViewPage() {
                     <div key={parent.id} className="flex items-center gap-3">
                       <MemberCard
                         member={parent}
-                        onClick={() => handleMemberCardClick(parent.id)}
+                        onClick={() => handleMemberClick(parent.id)}
+                        onViewDetails={() => handleMemberCardClick(parent.id)}
                       />
                       {/* Marriage connector between parents */}
                       {idx === 0 && relations.parents.length === 2 && (
@@ -225,7 +231,8 @@ function TreeViewPage() {
               <MemberCard
                 member={relations.member}
                 isFocused
-                onClick={() => handleMemberCardClick(relations.member.id)}
+                onClick={() => {}} // Already focused, no action needed
+                onViewDetails={() => handleMemberCardClick(relations.member.id)}
               />
 
               {relations.spouses.map((spouse) => (
@@ -237,7 +244,8 @@ function TreeViewPage() {
                   </div>
                   <MemberCard
                     member={spouse}
-                    onClick={() => handleMemberCardClick(spouse.id)}
+                    onClick={() => handleMemberClick(spouse.id)}
+                    onViewDetails={() => handleMemberCardClick(spouse.id)}
                   />
                 </div>
               ))}
@@ -267,7 +275,8 @@ function TreeViewPage() {
                     <MemberCard
                       key={child.id}
                       member={child}
-                      onClick={() => handleMemberCardClick(child.id)}
+                      onClick={() => handleMemberClick(child.id)}
+                      onViewDetails={() => handleMemberCardClick(child.id)}
                     />
                   ))}
                 </div>
@@ -292,26 +301,47 @@ function TreeViewPage() {
         open={detailModalMemberId !== null}
         onClose={() => setDetailModalMemberId(null)}
         memberId={detailModalMemberId}
-        onViewInTree={() => {
+        onEdit={() => {
           if (detailModalMemberId) {
-            handleMemberClick(detailModalMemberId)
+            setFormModalMode('edit')
+            setFormModalRelatedId(detailModalMemberId)
           }
         }}
-        onEdit={() => {
-          // TODO: Phase 5 - Open edit member modal
-          console.log('Edit member:', detailModalMemberId)
-        }}
         onAddChild={() => {
-          // TODO: Phase 5 - Open create child modal
-          console.log('Add child to:', detailModalMemberId)
+          if (detailModalMemberId) {
+            setFormModalMode('create-child')
+            setFormModalRelatedId(detailModalMemberId)
+          }
         }}
         onAddParent={() => {
-          // TODO: Phase 5 - Open create parent modal
-          console.log('Add parent to:', detailModalMemberId)
+          if (detailModalMemberId) {
+            setFormModalMode('create-parent')
+            setFormModalRelatedId(detailModalMemberId)
+          }
         }}
         onAddSpouse={() => {
-          // TODO: Phase 5 - Open create spouse modal
-          console.log('Add spouse to:', detailModalMemberId)
+          if (detailModalMemberId) {
+            setFormModalMode('create-spouse')
+            setFormModalRelatedId(detailModalMemberId)
+          }
+        }}
+      />
+
+      {/* ── Member Form Modal (Create/Edit) ───────────────────────────── */}
+      <MemberFormModal
+        open={formModalMode !== null}
+        onClose={() => {
+          setFormModalMode(null)
+          setFormModalRelatedId(undefined)
+        }}
+        mode={formModalMode ?? 'edit'}
+        relatedMemberId={
+          formModalMode !== 'edit' ? formModalRelatedId : undefined
+        }
+        memberId={formModalMode === 'edit' ? formModalRelatedId : undefined}
+        onSuccess={() => {
+          // The mutations already invalidate queries, which will trigger a refetch
+          // No need to manually call handleMemberClick - the query will refetch automatically
         }}
       />
 

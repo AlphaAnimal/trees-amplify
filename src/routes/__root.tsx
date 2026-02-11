@@ -24,7 +24,7 @@ function RootLayout() {
           {signOut && (
             <button
               onClick={signOut}
-              className="text-sm text-red-600 hover:text-red-800"
+              className="text-sm text-red-600 hover:text-red-800 cursor-pointer"
             >
               Sign Out
             </button>

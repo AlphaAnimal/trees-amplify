@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { amplifyTreesApi } from '@/services/amplifyDataClient'
 import { useCreateTree } from '@/hooks/useTreesApi'
@@ -57,6 +57,21 @@ export default function CreateTreeModal({ open, onClose }: Props) {
     reset()
     onClose()
   }
+
+  // ─── Escape key handler ───────────────────────────────────────────────
+  useEffect(() => {
+    if (!open) return
+
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === 'Escape' && !loading) {
+        reset()
+        onClose()
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [open, loading, onClose])
 
   async function handleTreeSubmit(e: { preventDefault: () => void }) {
     e.preventDefault()
@@ -138,7 +153,7 @@ export default function CreateTreeModal({ open, onClose }: Props) {
           </div>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

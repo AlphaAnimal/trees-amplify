@@ -61,7 +61,7 @@ export default function MemberSearch({ members, onSelect }: MemberSearchProps) {
               setQuery('')
               setIsOpen(false)
             }}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 cursor-pointer"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -80,7 +80,7 @@ export default function MemberSearch({ members, onSelect }: MemberSearchProps) {
                 setQuery('')
                 setIsOpen(false)
               }}
-              className="w-full px-3 py-2.5 text-left hover:bg-gray-50 flex items-center gap-3 text-sm transition-colors"
+              className="w-full px-3 py-2.5 text-left hover:bg-gray-50 flex items-center gap-3 text-sm transition-colors cursor-pointer"
             >
               <div
                 className={`
