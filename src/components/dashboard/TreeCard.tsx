@@ -17,13 +17,14 @@ const roleBadge: Record<Role, { label: string; className: string }> = {
   },
 }
 
-export default function TreeCard({ tree }: { tree: TreeSummary }) {
+export default function TreeCard({ tree }: { readonly tree: TreeSummary }) {
   const badge = roleBadge[tree.role]
 
   return (
     <Link
       to="/tree/$treeId"
       params={{ treeId: tree.tree_id }}
+      search={{ memberId: undefined }}
       onClick={() => {
         if (tree.partition_key) setPartitionKey(tree.partition_key)
       }}

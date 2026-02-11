@@ -6,8 +6,8 @@ import { setPartitionKey } from '@/services/flaskService'
 import type { Gender } from '@/types'
 
 interface Props {
-  open: boolean
-  onClose: () => void
+  readonly open: boolean
+  readonly onClose: () => void
 }
 
 type Step = 'tree' | 'member'
@@ -58,7 +58,7 @@ export default function CreateTreeModal({ open, onClose }: Props) {
     onClose()
   }
 
-  async function handleTreeSubmit(e: React.FormEvent) {
+  async function handleTreeSubmit(e: { preventDefault: () => void }) {
     e.preventDefault()
     setError(null)
     setLoading(true)
@@ -77,7 +77,7 @@ export default function CreateTreeModal({ open, onClose }: Props) {
     }
   }
 
-  async function handleMemberSubmit(e: React.FormEvent) {
+  async function handleMemberSubmit(e: { preventDefault: () => void }) {
     e.preventDefault()
     if (!amplifyTreeId) return
     setError(null)
@@ -101,6 +101,7 @@ export default function CreateTreeModal({ open, onClose }: Props) {
       navigate({
         to: '/tree/$treeId',
         params: { treeId: amplifyTreeId },
+        search: { memberId: undefined },
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create first member')
@@ -114,9 +115,11 @@ export default function CreateTreeModal({ open, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm cursor-default"
         onClick={handleClose}
+        aria-label="Close modal"
       />
 
       {/* Modal */}
