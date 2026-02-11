@@ -5,6 +5,7 @@ import { useTrees } from '@/hooks/useTreesApi'
 import TreeCard from '@/components/dashboard/TreeCard'
 import EmptyState from '@/components/dashboard/EmptyState'
 import CreateTreeModal from '@/components/dashboard/CreateTreeModal'
+import ErrorMessage from '@/components/ErrorMessage'
 
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
@@ -49,14 +50,17 @@ function DashboardPage() {
           </div>
         </div>
       ) : isError ? (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-6 py-4 text-sm text-red-700">
-          <p className="font-medium">Failed to load trees</p>
-          <p className="mt-1">{error?.message || 'An unknown error occurred'}</p>
+        <div className="animate-in fade-in duration-300">
+          <ErrorMessage
+            title="Failed to load trees"
+            message={error?.message || 'An unknown error occurred'}
+            onRetry={() => window.location.reload()}
+          />
         </div>
       ) : trees.length === 0 ? (
         <EmptyState onCreateTree={() => setShowCreateModal(true)} />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-300">
           {trees.map((tree) => (
             <TreeCard key={tree.tree_id} tree={tree} />
           ))}

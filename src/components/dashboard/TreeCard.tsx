@@ -28,7 +28,7 @@ export default function TreeCard({ tree }: { readonly tree: TreeSummary }) {
       onClick={() => {
         if (tree.partition_key) setPartitionKey(tree.partition_key)
       }}
-      className="block rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md hover:border-gray-300 transition-all overflow-hidden"
+      className="block rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 overflow-hidden transform hover:scale-[1.02]"
     >
       {/* Image banner */}
       <div className="h-32 bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center">

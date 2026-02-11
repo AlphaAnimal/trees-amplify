@@ -58,7 +58,7 @@ export default function DeleteTreeModal({ open, onClose, treeId, treeName }: Pro
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4">
+      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 animate-in slide-up duration-300">
         <div className="px-6 py-5">
           {/* Warning icon */}
           <div className="flex items-center gap-3 mb-4">

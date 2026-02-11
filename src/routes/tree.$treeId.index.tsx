@@ -8,6 +8,7 @@ import MemberSearch from '@/components/tree/MemberSearch'
 import DeleteTreeModal from '@/components/tree/DeleteTreeModal'
 import MemberDetailModal from '@/components/tree/MemberDetailModal'
 import MemberFormModal from '@/components/tree/MemberFormModal'
+import ErrorMessage from '@/components/ErrorMessage'
 
 export const Route = createRoute({
   getParentRoute: () => treeRoute,
@@ -39,16 +40,23 @@ function TreeViewPage() {
   const canEdit = tree?.role === 'owner' || tree?.role === 'editor'
 
   // ─── All members (for search + default focus) ─────────────────────
-  const { data: allMembers, isLoading: membersLoading } = useMembers(partitionKey)
+  const {
+    data: allMembers,
+    isLoading: membersLoading,
+    isError: membersError,
+    error: membersErrorObj,
+  } = useMembers(partitionKey)
 
   // ─── Determine focused member ────────────────────────────────────
   const focusedMemberId = searchMemberId ?? allMembers?.[0]?.id ?? null
 
   // ─── Direct relations for focused member ──────────────────────────
-  const { data: relations, isLoading: relationsLoading } = useDirectRelations(
-    partitionKey,
-    focusedMemberId,
-  )
+  const {
+    data: relations,
+    isLoading: relationsLoading,
+    isError: relationsError,
+    error: relationsErrorObj,
+  } = useDirectRelations(partitionKey, focusedMemberId)
 
   // ─── Navigation ──────────────────────────────────────────────────
   function handleMemberClick(memberId: string) {
@@ -65,6 +73,9 @@ function TreeViewPage() {
 
   // ─── Loading state ───────────────────────────────────────────────
   const isLoading = membersLoading || (focusedMemberId && relationsLoading)
+  const hasError = membersError || relationsError
+  const errorMessage =
+    membersErrorObj?.message || relationsErrorObj?.message || 'Failed to load tree data'
 
   if (!partitionKey) {
     return (
@@ -182,14 +193,26 @@ function TreeViewPage() {
       <div className="flex-1 overflow-auto bg-gray-50">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
-            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-3 animate-in fade-in duration-300">
               <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
               <p className="text-sm text-gray-500">Loading tree members…</p>
             </div>
           </div>
+        ) : hasError ? (
+          <div className="flex items-center justify-center h-full px-6">
+            <div className="max-w-md w-full animate-in fade-in duration-300">
+              <ErrorMessage
+                title="Failed to load tree"
+                message={errorMessage}
+                onRetry={() => {
+                  window.location.reload()
+                }}
+              />
+            </div>
+          </div>
         ) : !relations ? (
           <div className="flex items-center justify-center h-full">
-            <div className="text-center">
+            <div className="text-center animate-in fade-in duration-300">
               <p className="text-gray-400 text-lg mb-2">No members found</p>
               <p className="text-sm text-gray-400">
                 This tree doesn't have any members yet.
@@ -197,7 +220,7 @@ function TreeViewPage() {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center min-h-full py-12 px-6">
+          <div className="flex flex-col items-center justify-center min-h-full py-12 px-6 animate-in fade-in duration-300">
             {/* ── Parents Row ──────────────────────────────────────── */}
             {relations.parents.length > 0 && (
               <>

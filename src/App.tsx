@@ -3,6 +3,8 @@ import '@aws-amplify/ui-react/styles.css'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { routeTree } from './routeTree.gen'
+import MinimumScreenSize from './components/MinimumScreenSize'
+import ErrorBoundary from './components/ErrorBoundary'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,15 +25,19 @@ declare module '@tanstack/react-router' {
 
 export default function App() {
   return (
-    <Authenticator>
-      {({ signOut }) => (
-        <QueryClientProvider client={queryClient}>
-          <SignOutContext.Provider value={signOut}>
-            <RouterProvider router={router} />
-          </SignOutContext.Provider>
-        </QueryClientProvider>
-      )}
-    </Authenticator>
+    <ErrorBoundary>
+      <MinimumScreenSize>
+        <Authenticator>
+          {({ signOut }) => (
+            <QueryClientProvider client={queryClient}>
+              <SignOutContext.Provider value={signOut}>
+                <RouterProvider router={router} />
+              </SignOutContext.Provider>
+            </QueryClientProvider>
+          )}
+        </Authenticator>
+      </MinimumScreenSize>
+    </ErrorBoundary>
   )
 }
 

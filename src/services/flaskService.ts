@@ -59,28 +59,53 @@ async function request<T>(endpoint: string, opts: RequestOptions = {}): Promise<
     delete headers['Content-Type']
   }
 
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
-    method: opts.method ?? 'GET',
-    headers,
-    body: opts.isFormData
-      ? (opts.body as FormData)
-      : opts.body
-        ? JSON.stringify(opts.body)
-        : undefined,
-  })
+  try {
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+      method: opts.method ?? 'GET',
+      headers,
+      body: opts.isFormData
+        ? (opts.body as FormData)
+        : opts.body
+          ? JSON.stringify(opts.body)
+          : undefined,
+    })
 
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}))
-    const message = (body as Record<string, string>)?.error || `HTTP ${response.status}`
-    throw new Error(message)
-  }
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}))
+      const message = (body as Record<string, string>)?.error || 
+                      (body as Record<string, string>)?.message ||
+                      `HTTP ${response.status}: ${response.statusText}`
+      
+      // Handle specific error codes
+      if (response.status === 401) {
+        throw new Error('Authentication required. Please sign in again.')
+      } else if (response.status === 403) {
+        throw new Error('You do not have permission to perform this action.')
+      } else if (response.status === 404) {
+        throw new Error('Resource not found.')
+      } else if (response.status === 409) {
+        throw new Error(message || 'Conflict: This operation cannot be completed.')
+      } else if (response.status >= 500) {
+        throw new Error('Server error. Please try again later.')
+      }
+      
+      throw new Error(message)
+    }
 
-  // Some endpoints return plain text (e.g. update spouse relation)
-  const contentType = response.headers.get('content-type') ?? ''
-  if (contentType.includes('application/json')) {
-    return response.json() as Promise<T>
+    // Some endpoints return plain text (e.g. update spouse relation)
+    const contentType = response.headers.get('content-type') ?? ''
+    if (contentType.includes('application/json')) {
+      return response.json() as Promise<T>
+    }
+    return (await response.text()) as unknown as T
+  } catch (error) {
+    // Handle network errors
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Network error. Please check your internet connection and try again.')
+    }
+    // Re-throw other errors
+    throw error
   }
-  return (await response.text()) as unknown as T
 }
 
 // ─── Partition key helpers ───────────────────────────────────────────────────

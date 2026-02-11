@@ -45,6 +45,7 @@ export default function MemberCard({
             ? 'border-indigo-500 bg-indigo-50 shadow-md ring-2 ring-indigo-200'
             : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
         }
+        transition-all duration-200
       `}
     >
       {/* View Details Icon */}

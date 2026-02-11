@@ -82,6 +82,11 @@ export default function MemberDetailModal({
   const [uploadingPic, setUploadingPic] = useState(false)
   const [uploadingPhotos, setUploadingPhotos] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [uploadProgress, setUploadProgress] = useState<{
+    total: number
+    completed: number
+    currentFile?: string
+  } | null>(null)
   const picInputRef = useRef<HTMLInputElement>(null)
   const photosInputRef = useRef<HTMLInputElement>(null)
 
@@ -134,11 +139,18 @@ export default function MemberDetailModal({
 
     setUploadError(null)
     setUploadingPhotos(true)
+    setUploadProgress({ total: files.length, completed: 0 })
 
     try {
       await uploadPhotos.mutateAsync({ memberId, files })
+      setUploadProgress({ total: files.length, completed: files.length })
+      // Clear progress after a brief delay
+      setTimeout(() => {
+        setUploadProgress(null)
+      }, 1000)
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Failed to upload photos')
+      setUploadProgress(null)
     } finally {
       setUploadingPhotos(false)
       if (photosInputRef.current) photosInputRef.current.value = ''
@@ -167,7 +179,7 @@ export default function MemberDetailModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden flex flex-col animate-in slide-up duration-300">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
           <h2 className="text-xl font-semibold text-gray-900">Member Details</h2>
@@ -318,12 +330,15 @@ export default function MemberDetailModal({
                         accept="image/*"
                         multiple
                         onChange={handlePhotosUpload}
+                        disabled={uploadingPhotos}
                         className="hidden"
                         id="upload-photos"
                       />
                       <label
                         htmlFor="upload-photos"
-                        className="text-xs text-indigo-600 hover:text-indigo-700 cursor-pointer px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
+                        className={`text-xs text-indigo-600 hover:text-indigo-700 cursor-pointer px-2 py-1 rounded hover:bg-indigo-50 transition-colors ${
+                          uploadingPhotos ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
                       >
                         {uploadingPhotos ? 'Uploading…' : '+ Add Photos'}
                       </label>
@@ -332,8 +347,35 @@ export default function MemberDetailModal({
                 </div>
 
                 {uploadError && (
-                  <div className="mb-3 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700">
+                  <div className="mb-3 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 animate-in fade-in duration-200">
                     {uploadError}
+                  </div>
+                )}
+
+                {/* Upload Progress Indicator */}
+                {uploadProgress && uploadingPhotos && (
+                  <div className="mb-4 rounded-lg bg-indigo-50 border border-indigo-200 p-4 animate-in fade-in duration-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-indigo-900">
+                        Uploading photos...
+                      </span>
+                      <span className="text-sm text-indigo-700">
+                        {uploadProgress.completed} / {uploadProgress.total}
+                      </span>
+                    </div>
+                    <div className="w-full bg-indigo-200 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-indigo-600 h-full transition-all duration-300 ease-out"
+                        style={{
+                          width: `${(uploadProgress.completed / uploadProgress.total) * 100}%`,
+                        }}
+                      />
+                    </div>
+                    {uploadProgress.currentFile && (
+                      <p className="text-xs text-indigo-600 mt-2 truncate">
+                        {uploadProgress.currentFile}
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -342,7 +384,7 @@ export default function MemberDetailModal({
                     {photosUrls.map((url, idx) => (
                       <div
                         key={idx}
-                        className="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200"
+                        className="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200 transition-transform hover:scale-105"
                       >
                         <img
                           src={url}
@@ -356,11 +398,11 @@ export default function MemberDetailModal({
                       </div>
                     ))}
                   </div>
-                ) : (
+                ) : !uploadingPhotos ? (
                   <div className="text-center py-8 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-lg">
                     No photos available. Click "Add Photos" to upload some.
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
           )}
