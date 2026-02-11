@@ -265,7 +265,7 @@ export const mediaApi = {
   uploadPhotos: (memberId: string, files: File[]) => {
     const form = new FormData()
     form.append('member_id', memberId)
-    files.forEach((f) => form.append('files[]', f))
+    files.forEach((f) => form.append('files', f))
     return request<PhotosUploadResponse>('/member/photos', {
       ...withPartition(),
       method: 'POST',

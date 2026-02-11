@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   useCreateChild,
   useCreateParent,
   useCreateSpouse,
   useUpdateMember,
   useMember,
+  useUploadPic,
+  useUploadPhotos,
 } from '@/hooks/useTreesApi'
 import { getPartitionKey } from '@/services/flaskService'
 import type { Gender, Member } from '@/types'
-
-const PLACEHOLDER_URL = 'https://placehold.co/400'
 
 type Mode = 'create-child' | 'create-parent' | 'create-spouse' | 'edit'
 
@@ -41,6 +41,8 @@ export default function MemberFormModal({
   const createParent = useCreateParent(partitionKey)
   const createSpouse = useCreateSpouse(partitionKey)
   const updateMember = useUpdateMember(partitionKey)
+  const uploadPic = useUploadPic(partitionKey)
+  const uploadPhotos = useUploadPhotos(partitionKey)
 
   // ─── Form state ────────────────────────────────────────────────────
   const [name, setName] = useState('')
@@ -53,6 +55,12 @@ export default function MemberFormModal({
   const [divorced, setDivorced] = useState('') // For spouse creation
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // ─── File upload state ─────────────────────────────────────────────
+  const [picFile, setPicFile] = useState<File | null>(null)
+  const [photoFiles, setPhotoFiles] = useState<File[]>([])
+  const picInputRef = useRef<HTMLInputElement>(null)
+  const photosInputRef = useRef<HTMLInputElement>(null)
 
   // ─── Escape key handler ───────────────────────────────────────────────
   useEffect(() => {
@@ -87,6 +95,8 @@ export default function MemberFormModal({
       setDescription('')
       setMarried('')
       setDivorced('')
+      setPicFile(null)
+      setPhotoFiles([])
     }
   }, [isEdit, existingMember, open])
 
@@ -94,11 +104,40 @@ export default function MemberFormModal({
   function reset() {
     setError(null)
     setLoading(false)
+    setPicFile(null)
+    setPhotoFiles([])
+    if (picInputRef.current) picInputRef.current.value = ''
+    if (photosInputRef.current) photosInputRef.current.value = ''
   }
 
   function handleClose() {
     reset()
     onClose()
+  }
+
+  function handlePicChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validate image file
+      if (!file.type.startsWith('image/')) {
+        setError('Please select an image file')
+        return
+      }
+      setPicFile(file)
+    }
+  }
+
+  function handlePhotosChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || [])
+    if (files.length > 0) {
+      // Validate all are images
+      const invalidFiles = files.filter((f) => !f.type.startsWith('image/'))
+      if (invalidFiles.length > 0) {
+        setError('Please select only image files')
+        return
+      }
+      setPhotoFiles(files)
+    }
   }
 
   async function handleSubmit(e: { preventDefault: () => void }) {
@@ -115,6 +154,8 @@ export default function MemberFormModal({
       const bornDate = `${born}T00:00:00Z`
       const diedDate = died ? `${died}T00:00:00Z` : undefined
 
+      let createdMemberId: string | undefined
+
       if (isEdit && memberId) {
         // Update existing member
         await updateMember.mutateAsync({
@@ -122,12 +163,11 @@ export default function MemberFormModal({
           name: name.trim(),
           surname: surname.trim(),
           description: description.trim() || undefined,
-          pic: PLACEHOLDER_URL, // TODO: Add pic upload in future
-          photos: PLACEHOLDER_URL, // TODO: Add photos upload in future
         })
+        createdMemberId = memberId
       } else if (mode === 'create-child' && relatedMemberId) {
         // Create child
-        await createChild.mutateAsync({
+        const childResult = await createChild.mutateAsync({
           parent_id: relatedMemberId,
           name: name.trim(),
           surname: surname.trim(),
@@ -135,12 +175,13 @@ export default function MemberFormModal({
           description: description.trim() || 'No description provided.',
           born: bornDate,
           died: diedDate,
-          pic: PLACEHOLDER_URL,
-          photos: PLACEHOLDER_URL,
+          pic: '',
+          photos: '',
         })
+        createdMemberId = childResult.id
       } else if (mode === 'create-parent' && relatedMemberId) {
         // Create parent
-        await createParent.mutateAsync({
+        const parentResult = await createParent.mutateAsync({
           child_id: relatedMemberId,
           name: name.trim(),
           surname: surname.trim(),
@@ -148,9 +189,10 @@ export default function MemberFormModal({
           description: description.trim() || 'No description provided.',
           born: bornDate,
           died: diedDate,
-          pic: PLACEHOLDER_URL,
-          photos: PLACEHOLDER_URL,
+          pic: '',
+          photos: '',
         })
+        createdMemberId = parentResult.id
       } else if (mode === 'create-spouse' && relatedMemberId) {
         // Create spouse
         if (!married) {
@@ -158,7 +200,7 @@ export default function MemberFormModal({
           setLoading(false)
           return
         }
-        await createSpouse.mutateAsync({
+        const spouseResult = await createSpouse.mutateAsync({
           spouse_id: relatedMemberId,
           name: name.trim(),
           surname: surname.trim(),
@@ -166,11 +208,30 @@ export default function MemberFormModal({
           description: description.trim() || 'No description provided.',
           born: bornDate,
           died: diedDate,
-          pic: PLACEHOLDER_URL,
-          photos: PLACEHOLDER_URL,
+          pic: '',
+          photos: '',
           married: `${married}T00:00:00Z`,
           divorced: divorced ? `${divorced}T00:00:00Z` : null,
         })
+        createdMemberId = spouseResult.id
+      }
+
+      // Upload files if provided and member was created/updated
+      if (createdMemberId) {
+        try {
+          if (picFile) {
+            await uploadPic.mutateAsync({ memberId: createdMemberId, file: picFile })
+          }
+          if (photoFiles.length > 0) {
+            await uploadPhotos.mutateAsync({ memberId: createdMemberId, files: photoFiles })
+          }
+        } catch (uploadErr) {
+          // Don't fail the whole operation if upload fails, just log it
+          console.error('File upload failed:', uploadErr)
+          setError(
+            'Member created successfully, but some files failed to upload. You can upload them later.',
+          )
+        }
       }
 
       onSuccess?.()
@@ -391,6 +452,54 @@ export default function MemberFormModal({
                   placeholder="Tell us about this person…"
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
                 />
+              </div>
+
+              {/* ── Photo Uploads ───────────────────────────────────────── */}
+              <div className="space-y-4 pt-2 border-t border-gray-200">
+                <div>
+                  <label
+                    htmlFor="pic"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Profile Picture <span className="text-gray-400">(optional)</span>
+                  </label>
+                  <input
+                    id="pic"
+                    ref={picInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePicChange}
+                    className="w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 file:cursor-pointer cursor-pointer"
+                  />
+                  {picFile && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Selected: {picFile.name} ({(picFile.size / 1024).toFixed(1)} KB)
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="photos"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Photos <span className="text-gray-400">(optional)</span>
+                  </label>
+                  <input
+                    id="photos"
+                    ref={photosInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handlePhotosChange}
+                    className="w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 file:cursor-pointer cursor-pointer"
+                  />
+                  {photoFiles.length > 0 && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Selected {photoFiles.length} file{photoFiles.length > 1 ? 's' : ''}
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-2">

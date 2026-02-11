@@ -1,11 +1,19 @@
-import { useState, useEffect } from 'react'
-import { useMember, usePicUrl, usePhotosUrls } from '@/hooks/useTreesApi'
+import { useState, useEffect, useRef } from 'react'
+import {
+  useMember,
+  useDirectRelations,
+  usePicUrl,
+  usePhotosUrls,
+  useUploadPic,
+  useUploadPhotos,
+} from '@/hooks/useTreesApi'
 import { getPartitionKey } from '@/services/flaskService'
 
 interface Props {
   readonly open: boolean
   readonly onClose: () => void
   readonly memberId: string | null
+  readonly canEdit?: boolean
   readonly onEdit?: () => void
   readonly onAddChild?: () => void
   readonly onAddParent?: () => void
@@ -33,10 +41,27 @@ function formatYear(dateStr: string): string {
   }
 }
 
+// Minimum age to have children: 12 years 9 months = (12 * 365 + 9 * 30) days = 4650 days
+const MINIMUM_AGE_FOR_CHILDREN_DAYS = 12 * 365 + 9 * 30
+
+function isTooYoungToHaveChildren(born: string, died: string | null | undefined): boolean {
+  try {
+    const bornDate = new Date(born)
+    const referenceDate = died ? new Date(died) : new Date()
+    const ageInMs = referenceDate.getTime() - bornDate.getTime()
+    const ageInDays = ageInMs / (1000 * 60 * 60 * 24)
+    return ageInDays < MINIMUM_AGE_FOR_CHILDREN_DAYS
+  } catch {
+    // If date parsing fails, default to allowing (backend will validate)
+    return false
+  }
+}
+
 export default function MemberDetailModal({
   open,
   onClose,
   memberId,
+  canEdit = true,
   onEdit,
   onAddChild,
   onAddParent,
@@ -44,10 +69,21 @@ export default function MemberDetailModal({
 }: Props) {
   const partitionKey = getPartitionKey()
   const { data: member, isLoading: memberLoading } = useMember(partitionKey, memberId)
+  const { data: relations, isLoading: relationsLoading } = useDirectRelations(
+    partitionKey,
+    memberId,
+  )
   const { data: picData, isLoading: picLoading } = usePicUrl(partitionKey, memberId)
   const { data: photosData, isLoading: photosLoading } = usePhotosUrls(partitionKey, memberId)
+  const uploadPic = useUploadPic(partitionKey)
+  const uploadPhotos = useUploadPhotos(partitionKey)
 
   const [imageError, setImageError] = useState<string | null>(null)
+  const [uploadingPic, setUploadingPic] = useState(false)
+  const [uploadingPhotos, setUploadingPhotos] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const picInputRef = useRef<HTMLInputElement>(null)
+  const photosInputRef = useRef<HTMLInputElement>(null)
 
   // ─── Escape key handler ───────────────────────────────────────────────
   useEffect(() => {
@@ -63,11 +99,62 @@ export default function MemberDetailModal({
     return () => document.removeEventListener('keydown', handleEscape)
   }, [open, onClose])
 
+  // ─── Upload handlers ───────────────────────────────────────────────
+  async function handlePicUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !memberId) return
+
+    if (!file.type.startsWith('image/')) {
+      setUploadError('Please select an image file')
+      return
+    }
+
+    setUploadError(null)
+    setUploadingPic(true)
+
+    try {
+      await uploadPic.mutateAsync({ memberId, file })
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Failed to upload picture')
+    } finally {
+      setUploadingPic(false)
+      if (picInputRef.current) picInputRef.current.value = ''
+    }
+  }
+
+  async function handlePhotosUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0 || !memberId) return
+
+    const invalidFiles = files.filter((f) => !f.type.startsWith('image/'))
+    if (invalidFiles.length > 0) {
+      setUploadError('Please select only image files')
+      return
+    }
+
+    setUploadError(null)
+    setUploadingPhotos(true)
+
+    try {
+      await uploadPhotos.mutateAsync({ memberId, files })
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Failed to upload photos')
+    } finally {
+      setUploadingPhotos(false)
+      if (photosInputRef.current) photosInputRef.current.value = ''
+    }
+  }
+
   if (!open || !memberId) return null
 
-  const isLoading = memberLoading || picLoading || photosLoading
-  const picUrl = picData?.url
+  const isLoading = memberLoading || relationsLoading || picLoading || photosLoading
+  const picUrl = picData?.url || null
   const photosUrls = photosData?.urls ?? []
+  const parentsCount = relations?.parents.length ?? 0
+  const hasMaxParents = parentsCount >= 2
+  const memberName = member ? `${member.name} ${member.surname}` : ''
+  const isTooYoung =
+    member && isTooYoungToHaveChildren(member.born, member.died || null)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -119,7 +206,7 @@ export default function MemberDetailModal({
               <div className="flex flex-col sm:flex-row gap-6">
                 {/* Profile Picture */}
                 <div className="shrink-0">
-                  <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border-4 border-gray-200">
+                  <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border-4 border-gray-200 relative">
                     {picUrl && !imageError ? (
                       <img
                         src={picUrl}
@@ -137,7 +224,30 @@ export default function MemberDetailModal({
                         {member.surname.charAt(0)}
                       </div>
                     )}
+                    {uploadingPic && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
                   </div>
+                  {canEdit && (
+                    <>
+                      <input
+                        ref={picInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePicUpload}
+                        className="hidden"
+                        id="upload-pic"
+                      />
+                      <label
+                        htmlFor="upload-pic"
+                        className="mt-2 block text-center text-xs text-indigo-600 hover:text-indigo-700 cursor-pointer"
+                      >
+                        {uploadingPic ? 'Uploading…' : 'Change Picture'}
+                      </label>
+                    </>
+                  )}
                 </div>
 
                 {/* Basic Info */}
@@ -195,11 +305,39 @@ export default function MemberDetailModal({
               )}
 
               {/* ── Photos Section ────────────────────────────────────── */}
-              {photosUrls.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3">
-                    Photos ({photosUrls.length})
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-gray-700">
+                    Photos {photosUrls.length > 0 && `(${photosUrls.length})`}
                   </h4>
+                  {canEdit && (
+                    <>
+                      <input
+                        ref={photosInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handlePhotosUpload}
+                        className="hidden"
+                        id="upload-photos"
+                      />
+                      <label
+                        htmlFor="upload-photos"
+                        className="text-xs text-indigo-600 hover:text-indigo-700 cursor-pointer px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
+                      >
+                        {uploadingPhotos ? 'Uploading…' : '+ Add Photos'}
+                      </label>
+                    </>
+                  )}
+                </div>
+
+                {uploadError && (
+                  <div className="mb-3 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700">
+                    {uploadError}
+                  </div>
+                )}
+
+                {photosUrls.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {photosUrls.map((url, idx) => (
                       <div
@@ -218,14 +356,12 @@ export default function MemberDetailModal({
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {photosUrls.length === 0 && (
-                <div className="text-center py-8 text-gray-400 text-sm">
-                  No photos available for this member
-                </div>
-              )}
+                ) : (
+                  <div className="text-center py-8 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-lg">
+                    No photos available. Click "Add Photos" to upload some.
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -248,10 +384,18 @@ export default function MemberDetailModal({
               {onAddChild && (
                 <button
                   onClick={() => {
-                    onAddChild()
-                    onClose()
+                    if (!isTooYoung) {
+                      onAddChild()
+                      onClose()
+                    }
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                  disabled={isTooYoung}
+                  title={isTooYoung ? `${memberName} is too young to have children` : undefined}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    isTooYoung
+                      ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                      : 'text-gray-700 bg-gray-50 hover:bg-gray-100 cursor-pointer'
+                  }`}
                 >
                   Add Child
                 </button>
@@ -259,10 +403,18 @@ export default function MemberDetailModal({
               {onAddParent && (
                 <button
                   onClick={() => {
-                    onAddParent()
-                    onClose()
+                    if (!hasMaxParents) {
+                      onAddParent()
+                      onClose()
+                    }
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                  disabled={hasMaxParents}
+                  title={hasMaxParents ? `${memberName} already has 2 parents` : undefined}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    hasMaxParents
+                      ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                      : 'text-gray-700 bg-gray-50 hover:bg-gray-100 cursor-pointer'
+                  }`}
                 >
                   Add Parent
                 </button>

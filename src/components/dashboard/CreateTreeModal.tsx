@@ -12,8 +12,6 @@ interface Props {
 
 type Step = 'tree' | 'member'
 
-const PLACEHOLDER_URL = 'https://placehold.co/400'
-
 export default function CreateTreeModal({ open, onClose }: Props) {
   const navigate = useNavigate()
   const createTree = useCreateTree()
@@ -107,8 +105,8 @@ export default function CreateTreeModal({ open, onClose }: Props) {
         description: description.trim() || 'No description provided.',
         born: `${born}T00:00:00Z`,
         died: died ? `${died}T00:00:00Z` : undefined,
-        pic: PLACEHOLDER_URL,
-        photos: PLACEHOLDER_URL,
+        pic: '',
+        photos: '',
       })
 
       setPartitionKey(result.partition_key)

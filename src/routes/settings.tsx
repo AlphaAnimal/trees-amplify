@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createRoute, useNavigate } from '@tanstack/react-router'
+import { createRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './__root'
 import { useAuthMe, useDeleteAccount } from '@/hooks/useTreesApi'
 import { updatePassword, type UpdatePasswordInput } from 'aws-amplify/auth'
@@ -12,7 +12,6 @@ export const Route = createRoute({
 })
 
 function SettingsPage() {
-  const navigate = useNavigate()
   const { data: authData, isLoading: authLoading } = useAuthMe()
   const deleteAccount = useDeleteAccount()
 
@@ -80,8 +79,8 @@ function SettingsPage() {
       await deleteAccount.mutateAsync()
       // Sign out from Amplify
       await signOut()
-      // Navigate to home (will redirect to login)
-      navigate({ to: '/' })
+      // Force redirect to / (will redirect to login)
+      window.location.href = '/'
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : 'Failed to delete account')
       setDeleteLoading(false)

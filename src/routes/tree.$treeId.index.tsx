@@ -36,6 +36,7 @@ function TreeViewPage() {
   const partitionKey = tree?.partition_key ?? getPartitionKey()
   const treeName = tree?.name || 'Unnamed Tree'
   const isOwner = tree?.role === 'owner'
+  const canEdit = tree?.role === 'owner' || tree?.role === 'editor'
 
   // ─── All members (for search + default focus) ─────────────────────
   const { data: allMembers, isLoading: membersLoading } = useMembers(partitionKey)
@@ -301,30 +302,47 @@ function TreeViewPage() {
         open={detailModalMemberId !== null}
         onClose={() => setDetailModalMemberId(null)}
         memberId={detailModalMemberId}
-        onEdit={() => {
-          if (detailModalMemberId) {
-            setFormModalMode('edit')
-            setFormModalRelatedId(detailModalMemberId)
-          }
-        }}
-        onAddChild={() => {
-          if (detailModalMemberId) {
-            setFormModalMode('create-child')
-            setFormModalRelatedId(detailModalMemberId)
-          }
-        }}
-        onAddParent={() => {
-          if (detailModalMemberId) {
-            setFormModalMode('create-parent')
-            setFormModalRelatedId(detailModalMemberId)
-          }
-        }}
-        onAddSpouse={() => {
-          if (detailModalMemberId) {
-            setFormModalMode('create-spouse')
-            setFormModalRelatedId(detailModalMemberId)
-          }
-        }}
+        canEdit={canEdit}
+        onEdit={
+          canEdit
+            ? () => {
+                if (detailModalMemberId) {
+                  setFormModalMode('edit')
+                  setFormModalRelatedId(detailModalMemberId)
+                }
+              }
+            : undefined
+        }
+        onAddChild={
+          canEdit
+            ? () => {
+                if (detailModalMemberId) {
+                  setFormModalMode('create-child')
+                  setFormModalRelatedId(detailModalMemberId)
+                }
+              }
+            : undefined
+        }
+        onAddParent={
+          canEdit
+            ? () => {
+                if (detailModalMemberId) {
+                  setFormModalMode('create-parent')
+                  setFormModalRelatedId(detailModalMemberId)
+                }
+              }
+            : undefined
+        }
+        onAddSpouse={
+          canEdit
+            ? () => {
+                if (detailModalMemberId) {
+                  setFormModalMode('create-spouse')
+                  setFormModalRelatedId(detailModalMemberId)
+                }
+              }
+            : undefined
+        }
       />
 
       {/* ── Member Form Modal (Create/Edit) ───────────────────────────── */}

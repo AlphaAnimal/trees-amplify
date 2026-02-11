@@ -388,9 +388,12 @@ export function usePhotosUrls(
 
 export function useUploadPic(partitionKey: string | null) {
   const qc = useQueryClient()
+  const lockWrapper = useEditorLockWrapper(partitionKey, ({ memberId, file }: { memberId: string; file: File }) =>
+    mediaApi.uploadPic(memberId, file),
+  )
+
   return useMutation({
-    mutationFn: ({ memberId, file }: { memberId: string; file: File }) =>
-      mediaApi.uploadPic(memberId, file),
+    mutationFn: lockWrapper,
     onSuccess: (_data, variables) => {
       if (partitionKey) {
         qc.invalidateQueries({
@@ -406,9 +409,12 @@ export function useUploadPic(partitionKey: string | null) {
 
 export function useUploadPhotos(partitionKey: string | null) {
   const qc = useQueryClient()
+  const lockWrapper = useEditorLockWrapper(partitionKey, ({ memberId, files }: { memberId: string; files: File[] }) =>
+    mediaApi.uploadPhotos(memberId, files),
+  )
+
   return useMutation({
-    mutationFn: ({ memberId, files }: { memberId: string; files: File[] }) =>
-      mediaApi.uploadPhotos(memberId, files),
+    mutationFn: lockWrapper,
     onSuccess: (_data, variables) => {
       if (partitionKey) {
         qc.invalidateQueries({

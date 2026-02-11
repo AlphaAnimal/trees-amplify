@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import { usePicUrl } from '@/hooks/useTreesApi'
+import { getPartitionKey } from '@/services/flaskService'
 import type { Member, SpouseInfo } from '@/types'
 
 interface MemberCardProps {
@@ -21,8 +24,13 @@ export default function MemberCard({
   onClick,
   onViewDetails,
 }: MemberCardProps) {
+  const partitionKey = getPartitionKey()
+  const { data: picData } = usePicUrl(partitionKey, member.id)
+  const [imageError, setImageError] = useState(false)
   const initials = getInitials(member.name, member.surname)
   const isMale = member.gender === 'male'
+  const picUrl = picData?.url || null
+  const showPic = picUrl && !imageError
 
   // Check if this member is a SpouseInfo (has marriage data)
   const spouseInfo = 'married' in member ? member : null
@@ -79,11 +87,22 @@ export default function MemberCard({
       <div
         className={`
           w-14 h-14 rounded-full flex items-center justify-center
-          text-white font-semibold text-lg mb-2 shadow-sm
+          text-white font-semibold text-lg mb-2 shadow-sm overflow-hidden
           ${isMale ? 'bg-blue-500' : 'bg-pink-500'}
         `}
       >
-        {initials}
+        {showPic ? (
+          <img
+            src={picUrl}
+            alt={`${member.name} ${member.surname}`}
+            className="w-full h-full object-cover"
+            onError={() => {
+              setImageError(true)
+            }}
+          />
+        ) : (
+          <span>{initials}</span>
+        )}
       </div>
 
       {/* Name */}
