@@ -6,6 +6,7 @@ import { getPartitionKey } from '@/services/flaskService'
 import MemberCard from '@/components/tree/MemberCard'
 import MemberSearch from '@/components/tree/MemberSearch'
 import DeleteTreeModal from '@/components/tree/DeleteTreeModal'
+import MemberDetailModal from '@/components/tree/MemberDetailModal'
 
 export const Route = createRoute({
   getParentRoute: () => treeRoute,
@@ -22,6 +23,7 @@ function TreeViewPage() {
   const navigate = useNavigate()
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [detailModalMemberId, setDetailModalMemberId] = useState<string | null>(null)
 
   // ─── Tree info ────────────────────────────────────────────────────
   const { data: treesData } = useTrees()
@@ -49,6 +51,10 @@ function TreeViewPage() {
       params: { treeId },
       search: { memberId },
     })
+  }
+
+  function handleMemberCardClick(memberId: string) {
+    setDetailModalMemberId(memberId)
   }
 
   // ─── Loading state ───────────────────────────────────────────────
@@ -194,7 +200,7 @@ function TreeViewPage() {
                     <div key={parent.id} className="flex items-center gap-3">
                       <MemberCard
                         member={parent}
-                        onClick={() => handleMemberClick(parent.id)}
+                        onClick={() => handleMemberCardClick(parent.id)}
                       />
                       {/* Marriage connector between parents */}
                       {idx === 0 && relations.parents.length === 2 && (
@@ -219,7 +225,7 @@ function TreeViewPage() {
               <MemberCard
                 member={relations.member}
                 isFocused
-                onClick={() => {}}
+                onClick={() => handleMemberCardClick(relations.member.id)}
               />
 
               {relations.spouses.map((spouse) => (
@@ -231,7 +237,7 @@ function TreeViewPage() {
                   </div>
                   <MemberCard
                     member={spouse}
-                    onClick={() => handleMemberClick(spouse.id)}
+                    onClick={() => handleMemberCardClick(spouse.id)}
                   />
                 </div>
               ))}
@@ -261,7 +267,7 @@ function TreeViewPage() {
                     <MemberCard
                       key={child.id}
                       member={child}
-                      onClick={() => handleMemberClick(child.id)}
+                      onClick={() => handleMemberCardClick(child.id)}
                     />
                   ))}
                 </div>
@@ -280,6 +286,34 @@ function TreeViewPage() {
           </div>
         )}
       </div>
+
+      {/* ── Member Detail Modal ──────────────────────────────────────── */}
+      <MemberDetailModal
+        open={detailModalMemberId !== null}
+        onClose={() => setDetailModalMemberId(null)}
+        memberId={detailModalMemberId}
+        onViewInTree={() => {
+          if (detailModalMemberId) {
+            handleMemberClick(detailModalMemberId)
+          }
+        }}
+        onEdit={() => {
+          // TODO: Phase 5 - Open edit member modal
+          console.log('Edit member:', detailModalMemberId)
+        }}
+        onAddChild={() => {
+          // TODO: Phase 5 - Open create child modal
+          console.log('Add child to:', detailModalMemberId)
+        }}
+        onAddParent={() => {
+          // TODO: Phase 5 - Open create parent modal
+          console.log('Add parent to:', detailModalMemberId)
+        }}
+        onAddSpouse={() => {
+          // TODO: Phase 5 - Open create spouse modal
+          console.log('Add spouse to:', detailModalMemberId)
+        }}
+      />
 
       {/* ── Delete Modal ───────────────────────────────────────────── */}
       <DeleteTreeModal
