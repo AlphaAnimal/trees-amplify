@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createRoute, Link } from '@tanstack/react-router'
 import { Route as treeRoute } from './tree.$treeId'
 import { useTrees, useRoles, useAddRole, useRemoveRole } from '@/hooks/useTreesApi'
@@ -27,6 +27,10 @@ function AccessControlPage() {
   const [role, setRole] = useState<'editor' | 'viewer'>('editor')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false)
+  const [userToRemove, setUserToRemove] = useState<{ userId: string; email: string } | null>(null)
+  const [removeError, setRemoveError] = useState<string | null>(null)
+  const [removing, setRemoving] = useState(false)
 
   // ─── Handlers ───────────────────────────────────────────────────────
   async function handleAddRole(e: { preventDefault: () => void }) {
@@ -51,17 +55,48 @@ function AccessControlPage() {
     }
   }
 
-  async function handleRemoveRole(userId: string) {
-    if (!confirm('Are you sure you want to remove this user\'s access?')) {
-      return
-    }
+  function handleRemoveClick(userId: string, userEmail: string) {
+    setUserToRemove({ userId, email: userEmail })
+    setShowRemoveConfirm(true)
+    setRemoveError(null)
+  }
+
+  function handleCloseRemoveConfirm() {
+    setShowRemoveConfirm(false)
+    setUserToRemove(null)
+    setRemoveError(null)
+    setRemoving(false)
+  }
+
+  async function handleConfirmRemove() {
+    if (!userToRemove) return
+
+    setRemoving(true)
+    setRemoveError(null)
 
     try {
-      await removeRole.mutateAsync({ user_id: userId })
+      await removeRole.mutateAsync({ user_id: userToRemove.userId })
+      handleCloseRemoveConfirm()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to remove role')
+      setRemoveError(err instanceof Error ? err.message : 'Failed to remove role')
+    } finally {
+      setRemoving(false)
     }
   }
+
+  // ─── Escape key handler for remove confirmation ─────────────────────
+  useEffect(() => {
+    if (!showRemoveConfirm) return
+
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === 'Escape' && !removing) {
+        handleCloseRemoveConfirm()
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [showRemoveConfirm, removing])
 
   // ─── Group roles by type ────────────────────────────────────────────
   const roles = rolesData?.roles ?? []
@@ -115,6 +150,73 @@ function AccessControlPage() {
         </Link>
       </div>
 
+      {/* Remove User Confirmation Modal */}
+      {showRemoveConfirm && userToRemove && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={handleCloseRemoveConfirm}
+            disabled={removing}
+            aria-label="Close modal"
+          />
+          <div className="relative bg-[var(--color-surface-elevated)] rounded-2xl shadow-xl w-full max-w-md min-w-[320px] mx-4 animate-in slide-up duration-300">
+            <div className="px-6 py-5">
+              {/* Warning icon */}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-[var(--color-error)]/10 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-[var(--color-error)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">Remove User Access</h3>
+                  <p className="text-sm text-[var(--color-text-secondary)]">This action can be undone</p>
+                </div>
+              </div>
+
+              <p className="text-sm text-[var(--color-text-secondary)] mb-1">
+                Are you sure you want to remove access for{' '}
+                <strong className="text-[var(--color-text-primary)]">{userToRemove.email || `User ID: ${userToRemove.userId}`}</strong>?
+              </p>
+              <p className="text-sm text-[var(--color-text-secondary)]">
+                They will no longer be able to view or edit this tree.
+              </p>
+
+              {removeError && (
+                <div className="mt-4 rounded-lg bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 px-4 py-3 text-sm text-[var(--color-error)]">
+                  {removeError}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={handleCloseRemoveConfirm}
+                  disabled={removing}
+                  className="px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmRemove}
+                  disabled={removing}
+                  className="px-5 py-2 text-sm font-medium text-white bg-[var(--color-error)] rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                >
+                  {removing ? 'Removing…' : 'Remove Access'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Add Role Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -128,7 +230,7 @@ function AccessControlPage() {
             }}
             aria-label="Close modal"
           />
-          <div className="relative bg-[var(--color-surface-elevated)] rounded-2xl shadow-2xl w-full max-w-md mx-4">
+          <div className="relative bg-[var(--color-surface-elevated)] rounded-2xl shadow-xl w-full max-w-md min-w-[320px] mx-4 animate-in slide-up duration-300">
             <div className="px-6 py-5">
               <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Add User</h3>
 
@@ -279,7 +381,7 @@ function AccessControlPage() {
                         Editor
                       </span>
                       <button
-                        onClick={() => handleRemoveRole(r.userId)}
+                        onClick={() => handleRemoveClick(r.userId, r.email || `User ID: ${r.userId}`)}
                         className="text-xs text-[var(--color-error)] hover:opacity-80 transition-colors cursor-pointer"
                       >
                         Remove
@@ -321,7 +423,7 @@ function AccessControlPage() {
                         Viewer
                       </span>
                       <button
-                        onClick={() => handleRemoveRole(r.userId)}
+                        onClick={() => handleRemoveClick(r.userId, r.email || `User ID: ${r.userId}`)}
                         className="text-xs text-[var(--color-error)] hover:opacity-80 transition-colors cursor-pointer"
                       >
                         Remove
