@@ -29,11 +29,11 @@ export default function MinimumScreenSize({ children }: Props) {
 
   if (!isValidSize) {
     return (
-      <div className="fixed inset-0 bg-gray-50 flex items-center justify-center p-6">
+      <div className="fixed inset-0 bg-[var(--color-background)] flex items-center justify-center p-6">
         <div className="max-w-md text-center">
           <div className="mb-6">
             <svg
-              className="w-16 h-16 mx-auto text-gray-400"
+              className="w-16 h-16 mx-auto text-[var(--color-text-tertiary)]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -46,16 +46,16 @@ export default function MinimumScreenSize({ children }: Props) {
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-3">
+          <h1 className="text-2xl font-bold text-[var(--color-text-primary)] mb-3">
             Screen Size Too Small
           </h1>
-          <p className="text-gray-600 mb-2">
+          <p className="text-[var(--color-text-secondary)] mb-2">
             This application requires a minimum screen size of 13 inches (laptop).
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-[var(--color-text-secondary)]">
             Please use a device with at least {MIN_WIDTH}x{MIN_HEIGHT} pixels resolution.
           </p>
-          <p className="text-sm text-gray-400 mt-4">
+          <p className="text-sm text-[var(--color-text-tertiary)] mt-4">
             Current size: {typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'N/A'}
           </p>
         </div>
@@ -65,4 +65,5 @@ export default function MinimumScreenSize({ children }: Props) {
 
   return <>{children}</>
 }
+
 

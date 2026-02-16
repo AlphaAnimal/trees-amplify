@@ -91,69 +91,69 @@ function SettingsPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Settings</h1>
+      <h1 className="text-2xl font-bold text-[var(--color-text-primary)] mb-6">Settings</h1>
 
       {authLoading ? (
         <div className="flex items-center justify-center py-20">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
-            <p className="text-sm text-gray-500">Loading settings…</p>
+            <div className="w-8 h-8 border-4 border-[var(--color-border)] border-t-[var(--color-accent)] rounded-full animate-spin" />
+            <p className="text-sm text-[var(--color-text-secondary)]">Loading settings…</p>
           </div>
         </div>
       ) : (
         <div className="space-y-6">
           {/* ── Account Information ──────────────────────────────────── */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Account Information</h2>
+          <div className="bg-[var(--color-surface-elevated)] rounded-lg border border-[var(--color-border)] p-6">
+            <h2 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Account Information</h2>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
                   Email Address
                 </label>
-                <p className="text-sm text-gray-900">{user?.email || 'Not available'}</p>
+                <p className="text-sm text-[var(--color-text-primary)]">{user?.email || 'Not available'}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
                   Email Verified
                 </label>
-                <p className="text-sm text-gray-900">
+                <p className="text-sm text-[var(--color-text-primary)]">
                   {user?.email_verified ? (
-                    <span className="text-green-600">✓ Verified</span>
+                    <span className="text-[var(--color-success)]">✓ Verified</span>
                   ) : (
-                    <span className="text-amber-600">Not verified</span>
+                    <span className="text-[var(--color-warning)]">Not verified</span>
                   )}
                 </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
                   User ID
                 </label>
-                <p className="text-sm text-gray-500 font-mono">{user?.user_id || 'N/A'}</p>
+                <p className="text-sm text-[var(--color-text-secondary)] font-mono">{user?.user_id || 'N/A'}</p>
               </div>
             </div>
           </div>
 
           {/* ── Change Password ────────────────────────────────────────── */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h2>
+          <div className="bg-[var(--color-surface-elevated)] rounded-lg border border-[var(--color-border)] p-6">
+            <h2 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Change Password</h2>
             <button
               onClick={() => setShowPasswordModal(true)}
-              className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-[var(--color-accent)] bg-[var(--color-accent)]/10 rounded-lg hover:bg-[var(--color-accent)]/20 transition-colors"
             >
               Change Password
             </button>
           </div>
 
           {/* ── Delete Account ──────────────────────────────────────────── */}
-          <div className="bg-white rounded-lg border border-red-200 p-6">
-            <h2 className="text-lg font-semibold text-red-900 mb-2">Danger Zone</h2>
-            <p className="text-sm text-gray-600 mb-4">
+          <div className="bg-[var(--color-surface-elevated)] rounded-lg border border-[var(--color-error)]/20 p-6">
+            <h2 className="text-lg font-semibold text-[var(--color-error)] mb-2">Danger Zone</h2>
+            <p className="text-sm text-[var(--color-text-secondary)] mb-4">
               Once you delete your account, there is no going back. All your trees, members, and
               data will be permanently deleted.
             </p>
             <button
               onClick={() => setShowDeleteModal(true)}
-              className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-white bg-[var(--color-error)] rounded-lg hover:opacity-90 transition-opacity"
             >
               Delete Account
             </button>
@@ -176,12 +176,12 @@ function SettingsPage() {
             }}
             aria-label="Close modal"
           />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
+          <div className="relative bg-[var(--color-surface-elevated)] rounded-2xl shadow-2xl w-full max-w-md mx-4">
             <div className="px-6 py-5">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h3>
+              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Change Password</h3>
 
               {passwordError && (
-                <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                <div className="mb-4 rounded-lg bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 px-4 py-3 text-sm text-[var(--color-error)]">
                   {passwordError}
                 </div>
               )}
@@ -190,9 +190,9 @@ function SettingsPage() {
                 <div>
                   <label
                     htmlFor="oldPassword"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-sm font-medium text-[var(--color-text-primary)] mb-1"
                   >
-                    Current Password <span className="text-red-500">*</span>
+                    Current Password <span className="text-[var(--color-error)]">*</span>
                   </label>
                   <input
                     id="oldPassword"
@@ -200,16 +200,16 @@ function SettingsPage() {
                     required
                     value={oldPassword}
                     onChange={(e) => setOldPassword(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
                   />
                 </div>
 
                 <div>
                   <label
                     htmlFor="newPassword"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-sm font-medium text-[var(--color-text-primary)] mb-1"
                   >
-                    New Password <span className="text-red-500">*</span>
+                    New Password <span className="text-[var(--color-error)]">*</span>
                   </label>
                   <input
                     id="newPassword"
@@ -218,17 +218,17 @@ function SettingsPage() {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     minLength={8}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-400 mt-1">Must be at least 8 characters</p>
+                  <p className="text-xs text-[var(--color-text-tertiary)] mt-1">Must be at least 8 characters</p>
                 </div>
 
                 <div>
                   <label
                     htmlFor="confirmPassword"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-sm font-medium text-[var(--color-text-primary)] mb-1"
                   >
-                    Confirm New Password <span className="text-red-500">*</span>
+                    Confirm New Password <span className="text-[var(--color-error)]">*</span>
                   </label>
                   <input
                     id="confirmPassword"
@@ -236,7 +236,7 @@ function SettingsPage() {
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
                   />
                 </div>
 
@@ -251,14 +251,14 @@ function SettingsPage() {
                       setConfirmPassword('')
                     }}
                     disabled={passwordLoading}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={passwordLoading || !oldPassword || !newPassword || !confirmPassword}
-                    className="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-5 py-2 text-sm font-medium text-white bg-[var(--color-accent)] rounded-lg hover:bg-[var(--color-accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {passwordLoading ? 'Changing…' : 'Change Password'}
                   </button>
@@ -282,12 +282,12 @@ function SettingsPage() {
             }}
             aria-label="Close modal"
           />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
+          <div className="relative bg-[var(--color-surface-elevated)] rounded-2xl shadow-2xl w-full max-w-md mx-4">
             <div className="px-6 py-5">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-full bg-[var(--color-error)]/10 flex items-center justify-center shrink-0">
                   <svg
-                    className="w-5 h-5 text-red-600"
+                    className="w-5 h-5 text-[var(--color-error)]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -301,12 +301,12 @@ function SettingsPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Delete Account</h3>
-                  <p className="text-sm text-gray-500">This action cannot be undone</p>
+                  <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">Delete Account</h3>
+                  <p className="text-sm text-[var(--color-text-secondary)]">This action cannot be undone</p>
                 </div>
               </div>
 
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-[var(--color-text-secondary)] mb-4">
                 This will permanently delete your account and all associated data, including all
                 trees you own, members, photos, and access permissions.
               </p>
@@ -314,7 +314,7 @@ function SettingsPage() {
               <div className="mb-4">
                 <label
                   htmlFor="deleteConfirm"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-[var(--color-text-primary)] mb-1"
                 >
                   Type <strong>DELETE</strong> to confirm:
                 </label>
@@ -324,12 +324,12 @@ function SettingsPage() {
                   value={deleteConfirm}
                   onChange={(e) => setDeleteConfirm(e.target.value)}
                   placeholder="DELETE"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-error)] focus:border-transparent"
                 />
               </div>
 
               {deleteError && (
-                <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                <div className="mb-4 rounded-lg bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 px-4 py-3 text-sm text-[var(--color-error)]">
                   {deleteError}
                 </div>
               )}
@@ -342,14 +342,14 @@ function SettingsPage() {
                     setDeleteConfirm('')
                   }}
                   disabled={deleteLoading}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteAccount}
                   disabled={deleteLoading || deleteConfirm !== 'DELETE'}
-                  className="px-5 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-5 py-2 text-sm font-medium text-white bg-[var(--color-error)] rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
                 >
                   {deleteLoading ? 'Deleting…' : 'Delete Forever'}
                 </button>

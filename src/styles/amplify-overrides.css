@@ -1,0 +1,90 @@
+/* Amplify Authenticator Theme Overrides */
+
+/* Light Theme */
+[data-theme="light"] .amplify-authenticator,
+[data-theme="light"] .amplify-authenticator * {
+  --amplify-colors-background-primary: var(--color-background);
+  --amplify-colors-background-secondary: var(--color-surface);
+  --amplify-colors-border-primary: var(--color-border);
+  --amplify-colors-border-secondary: var(--color-border-subtle);
+  --amplify-colors-font-primary: var(--color-text-primary);
+  --amplify-colors-font-secondary: var(--color-text-secondary);
+  --amplify-colors-font-tertiary: var(--color-text-tertiary);
+  --amplify-colors-brand-primary-60: var(--color-accent);
+  --amplify-colors-brand-primary-80: var(--color-accent-hover);
+  --amplify-colors-font-error: var(--color-error);
+  --amplify-colors-background-error: var(--color-error);
+  --amplify-radii-small: var(--radius-sm);
+  --amplify-radii-medium: var(--radius-md);
+  --amplify-radii-large: var(--radius-lg);
+  --amplify-fonts-default-variable: var(--font-sans);
+}
+
+/* Dark Theme */
+[data-theme="dark"] .amplify-authenticator,
+[data-theme="dark"] .amplify-authenticator * {
+  --amplify-colors-background-primary: var(--color-background);
+  --amplify-colors-background-secondary: var(--color-surface);
+  --amplify-colors-border-primary: var(--color-border);
+  --amplify-colors-border-secondary: var(--color-border-subtle);
+  --amplify-colors-font-primary: var(--color-text-primary);
+  --amplify-colors-font-secondary: var(--color-text-secondary);
+  --amplify-colors-font-tertiary: var(--color-text-tertiary);
+  --amplify-colors-brand-primary-60: var(--color-accent);
+  --amplify-colors-brand-primary-80: var(--color-accent-hover);
+  --amplify-colors-font-error: var(--color-error);
+  --amplify-colors-background-error: var(--color-error);
+  --amplify-radii-small: var(--radius-sm);
+  --amplify-radii-medium: var(--radius-md);
+  --amplify-radii-large: var(--radius-lg);
+  --amplify-fonts-default-variable: var(--font-sans);
+}
+
+/* Override specific Amplify components */
+.amplify-authenticator {
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+}
+
+.amplify-tabs {
+  border-bottom-color: var(--color-border);
+}
+
+.amplify-tabs-item {
+  color: var(--color-text-secondary);
+}
+
+.amplify-tabs-item[data-state="active"] {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+.amplify-input {
+  background-color: var(--color-surface-elevated);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.amplify-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.amplify-button--primary {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+.amplify-button--primary:hover {
+  background-color: var(--color-accent-hover);
+}
+
+.amplify-button--link {
+  color: var(--color-accent);
+}
+
+.amplify-button--link:hover {
+  color: var(--color-accent-hover);
+}
+

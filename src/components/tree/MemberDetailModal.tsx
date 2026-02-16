@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import {
   useMember,
   useDirectRelations,
@@ -6,6 +7,7 @@ import {
   usePhotosUrls,
   useUploadPic,
   useUploadPhotos,
+  useDeleteMember,
 } from '@/hooks/useTreesApi'
 import { getPartitionKey } from '@/services/flaskService'
 
@@ -18,6 +20,7 @@ interface Props {
   readonly onAddChild?: () => void
   readonly onAddParent?: () => void
   readonly onAddSpouse?: () => void
+  readonly treeId?: string
 }
 
 function formatDate(dateStr: string): string {
@@ -66,8 +69,10 @@ export default function MemberDetailModal({
   onAddChild,
   onAddParent,
   onAddSpouse,
+  treeId,
 }: Props) {
   const partitionKey = getPartitionKey()
+  const navigate = useNavigate()
   const { data: member, isLoading: memberLoading } = useMember(partitionKey, memberId)
   const { data: relations, isLoading: relationsLoading } = useDirectRelations(
     partitionKey,
@@ -77,6 +82,7 @@ export default function MemberDetailModal({
   const { data: photosData, isLoading: photosLoading } = usePhotosUrls(partitionKey, memberId)
   const uploadPic = useUploadPic(partitionKey)
   const uploadPhotos = useUploadPhotos(partitionKey)
+  const deleteMember = useDeleteMember(partitionKey)
 
   const [imageError, setImageError] = useState<string | null>(null)
   const [uploadingPic, setUploadingPic] = useState(false)
@@ -87,6 +93,11 @@ export default function MemberDetailModal({
     completed: number
     currentFile?: string
   } | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false)
+  const [showDeleteError, setShowDeleteError] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
   const picInputRef = useRef<HTMLInputElement>(null)
   const photosInputRef = useRef<HTMLInputElement>(null)
 
@@ -168,6 +179,80 @@ export default function MemberDetailModal({
   const isTooYoung =
     member && isTooYoungToHaveChildren(member.born, member.died || null)
 
+  // Handle delete member
+  async function handleDelete() {
+    if (!memberId || deleting) return
+
+    setDeleting(true)
+    setDeleteError(null)
+    setUploadError(null)
+    try {
+      // Find the related member before deletion
+      const relatedMember =
+        relations?.parents[0] ||
+        relations?.children[0] ||
+        relations?.spouses[0]
+
+      const response = await deleteMember.mutateAsync(memberId)
+
+      // Check if the tree was deleted (last member deleted)
+      const treeWasDeleted = response?.message === 'Tree deleted'
+
+      // Close confirmation dialog
+      setShowDeleteConfirm(false)
+
+      // Show success dialog
+      setShowDeleteSuccess(true)
+
+      // After a short delay, close modal and navigate
+      setTimeout(() => {
+        setShowDeleteSuccess(false)
+        onClose()
+
+        if (treeWasDeleted) {
+          // If tree was deleted, redirect to dashboard
+          navigate({
+            to: '/',
+          })
+        } else if (relatedMember && treeId) {
+          // Navigate to the related member if it exists
+          navigate({
+            to: '/tree/$treeId',
+            params: { treeId },
+            search: { memberId: relatedMember.id },
+          })
+        } else if (treeId) {
+          // If no related member, just navigate to tree without memberId
+          navigate({
+            to: '/tree/$treeId',
+            params: { treeId },
+            search: { memberId: undefined },
+          })
+        }
+      }, 1500) // Show success message for 1.5 seconds
+    } catch (err) {
+      // Close confirmation dialog
+      setShowDeleteConfirm(false)
+      
+      // Show error dialog with backend error message
+      let errorMessage = err instanceof Error ? err.message : 'Failed to delete member'
+      
+      // Replace member ID with full name in error message if member data is available
+      if (member && memberId) {
+        const fullName = `${member.name} ${member.surname}`
+        // Replace various patterns that might include the member ID
+        errorMessage = errorMessage.replace(new RegExp(`Member with ID ${memberId}`, 'gi'), fullName)
+        errorMessage = errorMessage.replace(new RegExp(`member ${memberId}`, 'gi'), `member ${fullName}`)
+        errorMessage = errorMessage.replace(new RegExp(memberId, 'g'), fullName)
+      }
+      
+      setDeleteError(errorMessage)
+      setShowDeleteError(true)
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
@@ -179,13 +264,13 @@ export default function MemberDetailModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden flex flex-col animate-in slide-up duration-300">
+      <div className="relative bg-[var(--color-surface-elevated)] rounded-2xl shadow-2xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden flex flex-col animate-in slide-up duration-300">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
-          <h2 className="text-xl font-semibold text-gray-900">Member Details</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] shrink-0">
+          <h2 className="text-xl font-semibold text-[var(--color-text-primary)]">Member Details</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+            className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] transition-colors cursor-pointer"
             aria-label="Close"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,13 +289,13 @@ export default function MemberDetailModal({
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
               <div className="flex flex-col items-center gap-3">
-                <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
-                <p className="text-sm text-gray-500">Loading member details…</p>
+                <div className="w-8 h-8 border-4 border-[var(--color-border)] border-t-[var(--color-accent)] rounded-full animate-spin" />
+                <p className="text-sm text-[var(--color-text-secondary)]">Loading member details…</p>
               </div>
             </div>
           ) : !member ? (
             <div className="text-center py-20">
-              <p className="text-gray-400 text-lg">Member not found</p>
+              <p className="text-[var(--color-text-tertiary)] text-lg">Member not found</p>
             </div>
           ) : (
             <div className="space-y-6">
@@ -218,7 +303,7 @@ export default function MemberDetailModal({
               <div className="flex flex-col sm:flex-row gap-6">
                 {/* Profile Picture */}
                 <div className="shrink-0">
-                  <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border-4 border-gray-200 relative">
+                  <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden bg-[var(--color-surface)] flex items-center justify-center border-4 border-[var(--color-border)] relative">
                     {picUrl && !imageError ? (
                       <img
                         src={picUrl}
@@ -254,7 +339,7 @@ export default function MemberDetailModal({
                       />
                       <label
                         htmlFor="upload-pic"
-                        className="mt-2 block text-center text-xs text-indigo-600 hover:text-indigo-700 cursor-pointer"
+                        className="mt-2 block text-center text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] cursor-pointer transition-colors"
                       >
                         {uploadingPic ? 'Uploading…' : 'Change Picture'}
                       </label>
@@ -264,27 +349,27 @@ export default function MemberDetailModal({
 
                 {/* Basic Info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  <h3 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">
                     {member.name} {member.surname}
                   </h3>
 
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-500">Gender:</span>
-                      <span className="font-medium text-gray-900 capitalize">{member.gender}</span>
+                      <span className="text-[var(--color-text-secondary)]">Gender:</span>
+                      <span className="font-medium text-[var(--color-text-primary)] capitalize">{member.gender}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-500">Born:</span>
-                      <span className="font-medium text-gray-900">
+                      <span className="text-[var(--color-text-secondary)]">Born:</span>
+                      <span className="font-medium text-[var(--color-text-primary)]">
                         {formatDate(member.born)} ({formatYear(member.born)})
                       </span>
                     </div>
 
                     {member.died && (
                       <div className="flex items-center gap-2">
-                        <span className="text-gray-500">Died:</span>
-                        <span className="font-medium text-gray-900">
+                        <span className="text-[var(--color-text-secondary)]">Died:</span>
+                        <span className="font-medium text-[var(--color-text-primary)]">
                           {formatDate(member.died)} ({formatYear(member.died)})
                         </span>
                       </div>
@@ -292,8 +377,8 @@ export default function MemberDetailModal({
 
                     {member.died && (
                       <div className="flex items-center gap-2">
-                        <span className="text-gray-500">Lifespan:</span>
-                        <span className="font-medium text-gray-900">
+                        <span className="text-[var(--color-text-secondary)]">Lifespan:</span>
+                        <span className="font-medium text-[var(--color-text-primary)]">
                           {new Date(member.died).getFullYear() -
                             new Date(member.born).getFullYear()}{' '}
                           years
@@ -307,9 +392,9 @@ export default function MemberDetailModal({
               {/* ── Description ──────────────────────────────────────── */}
               {member.description && (
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Description</h4>
-                  <div className="bg-gray-50 rounded-lg p-4 max-h-48 overflow-y-auto">
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                  <h4 className="text-sm font-semibold text-[var(--color-text-primary)] mb-2">Description</h4>
+                  <div className="bg-[var(--color-surface)] rounded-lg p-4 max-h-48 overflow-y-auto">
+                    <p className="text-sm text-[var(--color-text-primary)] whitespace-pre-wrap leading-relaxed">
                       {member.description}
                     </p>
                   </div>
@@ -319,7 +404,7 @@ export default function MemberDetailModal({
               {/* ── Photos Section ────────────────────────────────────── */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-semibold text-gray-700">
+                  <h4 className="text-sm font-semibold text-[var(--color-text-primary)]">
                     Photos {photosUrls.length > 0 && `(${photosUrls.length})`}
                   </h4>
                   {canEdit && (
@@ -336,7 +421,7 @@ export default function MemberDetailModal({
                       />
                       <label
                         htmlFor="upload-photos"
-                        className={`text-xs text-indigo-600 hover:text-indigo-700 cursor-pointer px-2 py-1 rounded hover:bg-indigo-50 transition-colors ${
+                        className={`text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] cursor-pointer px-2 py-1 rounded hover:bg-[var(--color-accent)]/10 transition-colors ${
                           uploadingPhotos ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
                       >
@@ -347,32 +432,32 @@ export default function MemberDetailModal({
                 </div>
 
                 {uploadError && (
-                  <div className="mb-3 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 animate-in fade-in duration-200">
+                  <div className="mb-3 rounded-lg bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 px-3 py-2 text-xs text-[var(--color-error)] animate-in fade-in duration-200">
                     {uploadError}
                   </div>
                 )}
 
                 {/* Upload Progress Indicator */}
                 {uploadProgress && uploadingPhotos && (
-                  <div className="mb-4 rounded-lg bg-indigo-50 border border-indigo-200 p-4 animate-in fade-in duration-200">
+                  <div className="mb-4 rounded-lg bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/20 p-4 animate-in fade-in duration-200">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-indigo-900">
+                      <span className="text-sm font-medium text-[var(--color-accent)]">
                         Uploading photos...
                       </span>
-                      <span className="text-sm text-indigo-700">
+                      <span className="text-sm text-[var(--color-accent)]">
                         {uploadProgress.completed} / {uploadProgress.total}
                       </span>
                     </div>
-                    <div className="w-full bg-indigo-200 rounded-full h-2 overflow-hidden">
+                    <div className="w-full bg-[var(--color-accent)]/20 rounded-full h-2 overflow-hidden">
                       <div
-                        className="bg-indigo-600 h-full transition-all duration-300 ease-out"
+                        className="bg-[var(--color-accent)] h-full transition-all duration-300 ease-out"
                         style={{
                           width: `${(uploadProgress.completed / uploadProgress.total) * 100}%`,
                         }}
                       />
                     </div>
                     {uploadProgress.currentFile && (
-                      <p className="text-xs text-indigo-600 mt-2 truncate">
+                      <p className="text-xs text-[var(--color-accent)] mt-2 truncate">
                         {uploadProgress.currentFile}
                       </p>
                     )}
@@ -384,7 +469,7 @@ export default function MemberDetailModal({
                     {photosUrls.map((url, idx) => (
                       <div
                         key={idx}
-                        className="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200 transition-transform hover:scale-105"
+                        className="aspect-square rounded-lg overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)] transition-transform hover:scale-105"
                       >
                         <img
                           src={url}
@@ -399,7 +484,7 @@ export default function MemberDetailModal({
                     ))}
                   </div>
                 ) : !uploadingPhotos ? (
-                  <div className="text-center py-8 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-lg">
+                  <div className="text-center py-8 text-[var(--color-text-tertiary)] text-sm border-2 border-dashed border-[var(--color-border)] rounded-lg">
                     No photos available. Click "Add Photos" to upload some.
                   </div>
                 ) : null}
@@ -409,8 +494,8 @@ export default function MemberDetailModal({
         </div>
 
         {/* ── Action Buttons ─────────────────────────────────────────── */}
-        {(onEdit || onAddChild || onAddParent || onAddSpouse) && (
-          <div className="border-t border-gray-200 px-6 py-4 shrink-0">
+        {(onEdit || onAddChild || onAddParent || onAddSpouse || canEdit) && (
+          <div className="border-t border-[var(--color-border)] px-6 py-4 shrink-0">
             <div className="flex flex-wrap items-center gap-3">
               {onEdit && (
                 <button
@@ -418,7 +503,7 @@ export default function MemberDetailModal({
                     onEdit()
                     onClose()
                   }}
-                  className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors cursor-pointer"
+                  className="px-4 py-2 text-sm font-medium text-[var(--color-accent)] bg-[var(--color-accent)]/10 rounded-lg hover:bg-[var(--color-accent)]/20 transition-colors cursor-pointer"
                 >
                   Edit
                 </button>
@@ -435,8 +520,8 @@ export default function MemberDetailModal({
                   title={isTooYoung ? `${memberName} is too young to have children` : undefined}
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                     isTooYoung
-                      ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                      : 'text-gray-700 bg-gray-50 hover:bg-gray-100 cursor-pointer'
+                      ? 'text-[var(--color-text-tertiary)] bg-[var(--color-surface)] cursor-not-allowed'
+                      : 'text-[var(--color-text-primary)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-elevated)] cursor-pointer'
                   }`}
                 >
                   Add Child
@@ -454,8 +539,8 @@ export default function MemberDetailModal({
                   title={hasMaxParents ? `${memberName} already has 2 parents` : undefined}
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                     hasMaxParents
-                      ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                      : 'text-gray-700 bg-gray-50 hover:bg-gray-100 cursor-pointer'
+                      ? 'text-[var(--color-text-tertiary)] bg-[var(--color-surface)] cursor-not-allowed'
+                      : 'text-[var(--color-text-primary)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-elevated)] cursor-pointer'
                   }`}
                 >
                   Add Parent
@@ -467,15 +552,175 @@ export default function MemberDetailModal({
                     onAddSpouse()
                     onClose()
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                  className="px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] bg-[var(--color-surface)] rounded-lg hover:bg-[var(--color-surface-elevated)] transition-colors cursor-pointer"
                 >
                   Add Spouse
+                </button>
+              )}
+              {canEdit && (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={deleting}
+                  className="px-4 py-2 text-sm font-medium text-white bg-[var(--color-error)] rounded-lg hover:bg-[var(--color-error)]/90 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Delete
                 </button>
               )}
             </div>
           </div>
         )}
       </div>
+
+      {/* ── Delete Confirmation Dialog ───────────────────────────────────── */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setShowDeleteConfirm(false)}
+            aria-label="Close confirmation"
+          />
+
+          {/* Confirmation Modal */}
+          <div className="relative bg-[var(--color-surface-elevated)] rounded-2xl shadow-2xl w-full max-w-md min-w-[320px] animate-in slide-up duration-300">
+            <div className="px-6 py-6">
+              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
+                Delete Member
+              </h3>
+              <p className="text-sm text-[var(--color-text-secondary)] mb-6 break-words">
+                Are you sure you want to delete {memberName}? This action cannot be undone.
+              </p>
+
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false)
+                    setDeleteError(null)
+                  }}
+                  disabled={deleting}
+                  className="px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] bg-[var(--color-surface)] rounded-lg hover:bg-[var(--color-surface-elevated)] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="px-4 py-2 text-sm font-medium text-white bg-[var(--color-error)] rounded-lg hover:bg-[var(--color-error)]/90 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {deleting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    'Delete'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Success Dialog ───────────────────────────────────── */}
+      {showDeleteSuccess && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+
+          {/* Success Modal */}
+          <div className="relative bg-[var(--color-surface-elevated)] rounded-2xl shadow-2xl w-full max-w-md min-w-[320px] animate-in slide-up duration-300">
+            <div className="px-6 py-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
+                  <svg
+                    className="w-6 h-6 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
+                    Member Deleted Successfully
+                  </h3>
+                  <p className="text-sm text-[var(--color-text-secondary)]">
+                    {memberName} has been deleted from the tree.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Error Dialog ───────────────────────────────────── */}
+      {showDeleteError && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => {
+              setShowDeleteError(false)
+              setDeleteError(null)
+            }}
+            aria-label="Close error dialog"
+          />
+
+          {/* Error Modal */}
+          <div className="relative bg-[var(--color-surface-elevated)] rounded-2xl shadow-2xl w-full max-w-md min-w-[320px] animate-in slide-up duration-300">
+            <div className="px-6 py-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-[var(--color-error)]/20 flex items-center justify-center shrink-0">
+                  <svg
+                    className="w-6 h-6 text-[var(--color-error)]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
+                    Deletion Failed
+                  </h3>
+                </div>
+              </div>
+
+              <div className="mb-6 rounded-lg bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 px-3 py-2 text-sm text-[var(--color-error)]">
+                {deleteError || 'Failed to delete member'}
+              </div>
+
+              <div className="flex items-center justify-end">
+                <button
+                  onClick={() => {
+                    setShowDeleteError(false)
+                    setDeleteError(null)
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] bg-[var(--color-surface)] rounded-lg hover:bg-[var(--color-surface-elevated)] transition-colors cursor-pointer"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

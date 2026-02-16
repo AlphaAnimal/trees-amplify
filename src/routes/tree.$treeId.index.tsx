@@ -8,6 +8,7 @@ import MemberSearch from '@/components/tree/MemberSearch'
 import DeleteTreeModal from '@/components/tree/DeleteTreeModal'
 import MemberDetailModal from '@/components/tree/MemberDetailModal'
 import MemberFormModal from '@/components/tree/MemberFormModal'
+import MarriageEditModal from '@/components/tree/MarriageEditModal'
 import ErrorMessage from '@/components/ErrorMessage'
 
 export const Route = createRoute({
@@ -30,6 +31,14 @@ function TreeViewPage() {
     'create-child' | 'create-parent' | 'create-spouse' | 'edit' | null
   >(null)
   const [formModalRelatedId, setFormModalRelatedId] = useState<string | undefined>(undefined)
+  
+  // Marriage edit modal state
+  const [marriageEditModal, setMarriageEditModal] = useState<{
+    member1Id: string
+    member2Id: string
+    married: string
+    divorced: string | null
+  } | null>(null)
 
   // ─── Tree info ────────────────────────────────────────────────────
   const { data: treesData } = useTrees()
@@ -79,24 +88,24 @@ function TreeViewPage() {
 
   if (!partitionKey) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-57px)]">
+      <div className="flex items-center justify-center h-full">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
-          <p className="text-sm text-gray-500">Loading tree…</p>
+          <div className="w-8 h-8 border-4 border-[var(--color-border)] border-t-[var(--color-accent)] rounded-full animate-spin" />
+          <p className="text-sm text-[var(--color-text-secondary)]">Loading tree…</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="h-[calc(100vh-57px)] flex flex-col">
+    <div className="h-full flex flex-col">
       {/* ── Top Bar ────────────────────────────────────────────────── */}
-      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center justify-between shrink-0">
+      <div className="bg-[var(--color-surface-elevated)] border-b border-[var(--color-border)] px-4 sm:px-6 py-2 flex items-center justify-between shrink-0">
         {/* Left: back + title */}
         <div className="flex items-center gap-3 min-w-0">
           <Link
             to="/"
-            className="text-gray-400 hover:text-gray-600 transition-colors shrink-0"
+            className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] transition-colors shrink-0"
             title="Back to dashboard"
           >
             <svg
@@ -114,7 +123,7 @@ function TreeViewPage() {
             </svg>
           </Link>
 
-          <h1 className="text-lg font-semibold text-gray-900 truncate">
+          <h1 className="text-base font-semibold text-[var(--color-text-primary)] truncate">
             {treeName}
           </h1>
 
@@ -122,10 +131,10 @@ function TreeViewPage() {
             <span
               className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${
                 tree.role === 'owner'
-                  ? 'bg-indigo-100 text-indigo-700'
+                  ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)]'
                   : tree.role === 'editor'
-                    ? 'bg-amber-100 text-amber-700'
-                    : 'bg-gray-100 text-gray-600'
+                    ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]'
+                    : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)]'
               }`}
             >
               {tree.role.charAt(0).toUpperCase() + tree.role.slice(1)}
@@ -146,7 +155,7 @@ function TreeViewPage() {
             <Link
               to="/tree/$treeId/access"
               params={{ treeId }}
-              className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors shrink-0"
+              className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-[var(--color-surface)] transition-colors shrink-0"
             >
               <svg
                 className="w-4 h-4"
@@ -168,7 +177,7 @@ function TreeViewPage() {
           {isOwner && (
             <button
               onClick={() => setShowDeleteModal(true)}
-              className="text-sm text-red-500 hover:text-red-700 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors shrink-0 cursor-pointer"
+              className="text-sm text-[var(--color-error)] hover:opacity-80 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-[var(--color-error)]/10 transition-colors shrink-0 cursor-pointer"
             >
               <svg
                 className="w-4 h-4"
@@ -190,12 +199,12 @@ function TreeViewPage() {
       </div>
 
       {/* ── Tree View ──────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-auto bg-gray-50">
+      <div className="flex-1 overflow-auto bg-[var(--color-background)]">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <div className="flex flex-col items-center gap-3 animate-in fade-in duration-300">
-              <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
-              <p className="text-sm text-gray-500">Loading tree members…</p>
+              <div className="w-8 h-8 border-4 border-[var(--color-border)] border-t-[var(--color-accent)] rounded-full animate-spin" />
+              <p className="text-sm text-[var(--color-text-secondary)]">Loading tree members…</p>
             </div>
           </div>
         ) : hasError ? (
@@ -213,14 +222,14 @@ function TreeViewPage() {
         ) : !relations ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center animate-in fade-in duration-300">
-              <p className="text-gray-400 text-lg mb-2">No members found</p>
-              <p className="text-sm text-gray-400">
+              <p className="text-[var(--color-text-tertiary)] text-lg mb-2">No members found</p>
+              <p className="text-sm text-[var(--color-text-tertiary)]">
                 This tree doesn't have any members yet.
               </p>
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center min-h-full py-12 px-6 animate-in fade-in duration-300">
+          <div className="flex flex-col items-center justify-center min-h-full py-8 px-6 animate-in fade-in duration-300">
             {/* ── Parents Row ──────────────────────────────────────── */}
             {relations.parents.length > 0 && (
               <>
@@ -235,7 +244,7 @@ function TreeViewPage() {
                       {/* Marriage connector between parents */}
                       {idx === 0 && relations.parents.length === 2 && (
                         <div className="flex flex-col items-center">
-                          <div className="w-8 border-t-2 border-dashed border-gray-300" />
+                          <div className="w-12 border-t-2 border-dashed border-[var(--color-border)]" />
                         </div>
                       )}
                     </div>
@@ -243,58 +252,99 @@ function TreeViewPage() {
                 </div>
 
                 {/* Vertical connector to focused member */}
-                <div className="flex flex-col items-center my-2">
-                  <div className="w-px h-8 bg-gray-300" />
-                  <div className="w-2 h-2 rounded-full bg-gray-300" />
+                <div className="flex flex-col items-center my-3">
+                  <div className="w-0.5 h-10 bg-[var(--color-border)]" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-[var(--color-border)]" />
                 </div>
               </>
             )}
 
             {/* ── Focused Member + Spouses Row ─────────────────────── */}
-            <div className="flex items-center justify-center gap-3">
-              <MemberCard
-                member={relations.member}
-                isFocused
-                onClick={() => {}} // Already focused, no action needed
-                onViewDetails={() => handleMemberCardClick(relations.member.id)}
-              />
+            <div className="relative w-full flex items-center min-h-[300px]">
+              {/* Focused member - absolutely centered */}
+              <div className="absolute left-1/2 -translate-x-1/2 z-10">
+                <MemberCard
+                  member={relations.member}
+                  isFocused
+                  onClick={() => {}} // Already focused, no action needed
+                  onViewDetails={() => handleMemberCardClick(relations.member.id)}
+                />
+              </div>
 
-              {relations.spouses.map((spouse) => (
-                <div key={spouse.id} className="flex items-center gap-3">
-                  {/* Marriage connector */}
-                  <div className="flex flex-col items-center gap-0.5">
-                    <span className="text-gray-300 text-sm">♥</span>
-                    <div className="w-6 border-t-2 border-dashed border-gray-300" />
-                  </div>
-                  <MemberCard
-                    member={spouse}
-                    onClick={() => handleMemberClick(spouse.id)}
-                    onViewDetails={() => handleMemberCardClick(spouse.id)}
-                  />
+              {/* Spouses container - positioned to start right after focused member, scrollable */}
+              <div className="w-full flex items-center overflow-x-auto overflow-y-hidden px-4">
+                <div 
+                  className="flex items-center gap-4 min-w-max"
+                  style={{ marginLeft: 'calc(50% + 140px)' }}
+                >
+                  {[...relations.spouses]
+                    .sort((a, b) => {
+                      // Sort by marriage date (ascending - earliest first)
+                      const dateA = new Date(a.married).getTime()
+                      const dateB = new Date(b.married).getTime()
+                      return dateA - dateB
+                    })
+                    .map((spouse) => (
+                      <div key={spouse.id} className="flex items-center gap-4 shrink-0">
+                        {/* Marriage connector */}
+                        <div className="flex flex-col items-center gap-1">
+                          <button
+                            onClick={() => {
+                              if (canEdit) {
+                                setMarriageEditModal({
+                                  member1Id: relations.member.id,
+                                  member2Id: spouse.id,
+                                  married: spouse.married,
+                                  divorced: spouse.divorced,
+                                })
+                              }
+                            }}
+                            disabled={!canEdit}
+                            className={`
+                              text-base transition-colors cursor-pointer
+                              ${canEdit
+                                ? 'text-[var(--color-text-tertiary)] hover:text-[var(--color-accent)]'
+                                : 'text-[var(--color-text-tertiary)] cursor-default'
+                              }
+                            `}
+                            title={canEdit ? 'Edit marriage details' : undefined}
+                            aria-label="Edit marriage details"
+                          >
+                            ♥
+                          </button>
+                          <div className="w-10 border-t-2 border-dashed border-[var(--color-border)]" />
+                        </div>
+                        <MemberCard
+                          member={spouse}
+                          onClick={() => handleMemberClick(spouse.id)}
+                          onViewDetails={() => handleMemberCardClick(spouse.id)}
+                        />
+                      </div>
+                    ))}
                 </div>
-              ))}
+              </div>
             </div>
 
             {/* ── Children Row ─────────────────────────────────────── */}
             {relations.children.length > 0 && (
               <>
                 {/* Vertical connector to children */}
-                <div className="flex flex-col items-center my-2">
-                  <div className="w-2 h-2 rounded-full bg-gray-300" />
-                  <div className="w-px h-8 bg-gray-300" />
+                <div className="flex flex-col items-center my-3">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[var(--color-border)]" />
+                  <div className="w-0.5 h-10 bg-[var(--color-border)]" />
                 </div>
 
                 {/* Horizontal spread line for multiple children */}
                 {relations.children.length > 1 && (
                   <div
-                    className="border-t-2 border-gray-300 mb-2"
+                    className="border-t-2 border-[var(--color-border)] mb-3"
                     style={{
-                      width: `${Math.min(relations.children.length * 160, 800)}px`,
+                      width: `${Math.min(relations.children.length * 280, 1200)}px`,
                     }}
                   />
                 )}
 
-                <div className="flex items-start justify-center gap-4 overflow-x-auto max-w-full pb-4 px-4">
+                <div className="flex items-start justify-center gap-6 overflow-x-auto max-w-full pb-4 px-4">
                   {relations.children.map((child) => (
                     <MemberCard
                       key={child.id}
@@ -311,9 +361,8 @@ function TreeViewPage() {
             {relations.parents.length === 0 &&
               relations.spouses.length === 0 &&
               relations.children.length === 0 && (
-                <p className="mt-8 text-sm text-gray-400 text-center max-w-xs">
-                  This is the only member in the tree. Add parents, spouses, or
-                  children from the member detail view.
+                <p className="mt-8 text-sm text-[var(--color-text-tertiary)] text-center">
+                  This is the first tree member. Expand the member to view details and add new members.
                 </p>
               )}
           </div>
@@ -326,6 +375,7 @@ function TreeViewPage() {
         onClose={() => setDetailModalMemberId(null)}
         memberId={detailModalMemberId}
         canEdit={canEdit}
+        treeId={treeId}
         onEdit={
           canEdit
             ? () => {
@@ -392,6 +442,16 @@ function TreeViewPage() {
         onClose={() => setShowDeleteModal(false)}
         treeId={treeId}
         treeName={treeName}
+      />
+
+      {/* ── Marriage Edit Modal ─────────────────────────────────────── */}
+      <MarriageEditModal
+        open={marriageEditModal !== null}
+        onClose={() => setMarriageEditModal(null)}
+        member1Id={marriageEditModal?.member1Id ?? null}
+        member2Id={marriageEditModal?.member2Id ?? null}
+        currentMarried={marriageEditModal?.married ?? ''}
+        currentDivorced={marriageEditModal?.divorced ?? null}
       />
     </div>
   )

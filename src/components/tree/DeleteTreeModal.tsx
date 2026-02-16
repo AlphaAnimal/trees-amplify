@@ -58,12 +58,12 @@ export default function DeleteTreeModal({ open, onClose, treeId, treeName }: Pro
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 animate-in slide-up duration-300">
+      <div className="relative bg-[var(--color-surface-elevated)] rounded-2xl shadow-xl w-full max-w-md min-w-[320px] mx-4 animate-in slide-up duration-300">
         <div className="px-6 py-5">
           {/* Warning icon */}
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-10 h-10 rounded-full bg-[var(--color-error)]/10 flex items-center justify-center shrink-0">
+              <svg className="w-5 h-5 text-[var(--color-error)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -73,22 +73,22 @@ export default function DeleteTreeModal({ open, onClose, treeId, treeName }: Pro
               </svg>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Delete Tree</h3>
-              <p className="text-sm text-gray-500">This action cannot be undone</p>
+              <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">Delete Tree</h3>
+              <p className="text-sm text-[var(--color-text-secondary)]">This action cannot be undone</p>
             </div>
           </div>
 
-          <p className="text-sm text-gray-600 mb-1">
+          <p className="text-sm text-[var(--color-text-secondary)] mb-1">
             Are you sure you want to delete{' '}
-            <strong className="text-gray-900">{treeName}</strong>?
+            <strong className="text-[var(--color-text-primary)]">{treeName}</strong>?
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-[var(--color-text-secondary)]">
             All members, relationships, photos, and access permissions will be
             permanently removed.
           </p>
 
           {error && (
-            <div className="mt-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            <div className="mt-4 rounded-lg bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 px-4 py-3 text-sm text-[var(--color-error)]">
               {error}
             </div>
           )}
@@ -97,14 +97,14 @@ export default function DeleteTreeModal({ open, onClose, treeId, treeName }: Pro
             <button
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors cursor-pointer"
+              className="px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               onClick={handleDelete}
               disabled={loading}
-              className="px-5 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              className="px-5 py-2 text-sm font-medium text-white bg-[var(--color-error)] rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
               {loading ? 'Deleting…' : 'Delete Forever'}
             </button>

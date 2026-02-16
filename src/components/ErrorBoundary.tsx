@@ -31,11 +31,11 @@ export default class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="fixed inset-0 bg-gray-50 flex items-center justify-center p-6">
+        <div className="fixed inset-0 bg-[var(--color-background)] flex items-center justify-center p-6">
           <div className="max-w-md text-center">
             <div className="mb-6">
               <svg
-                className="w-16 h-16 mx-auto text-red-400"
+                className="w-16 h-16 mx-auto text-[var(--color-error)]"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -48,25 +48,25 @@ export default class ErrorBoundary extends Component<Props, State> {
                 />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-3">
+            <h1 className="text-2xl font-bold text-[var(--color-text-primary)] mb-3">
               Something went wrong
             </h1>
-            <p className="text-gray-600 mb-4">
+            <p className="text-[var(--color-text-secondary)] mb-4">
               An unexpected error occurred. Please refresh the page to try again.
             </p>
             {this.state.error && (
-              <details className="text-left text-sm text-gray-500 mb-4">
-                <summary className="cursor-pointer hover:text-gray-700">
+              <details className="text-left text-sm text-[var(--color-text-secondary)] mb-4">
+                <summary className="cursor-pointer hover:text-[var(--color-text-primary)] transition-colors">
                   Error details
                 </summary>
-                <pre className="mt-2 p-3 bg-gray-100 rounded overflow-auto text-xs">
+                <pre className="mt-2 p-3 bg-[var(--color-surface)] rounded overflow-auto text-xs">
                   {this.state.error.message}
                 </pre>
               </details>
             )}
             <button
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors cursor-pointer"
+              className="px-4 py-2 bg-[var(--color-accent)] text-white rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors cursor-pointer"
             >
               Refresh Page
             </button>
@@ -78,4 +78,5 @@ export default class ErrorBoundary extends Component<Props, State> {
     return this.props.children
   }
 }
+
 

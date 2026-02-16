@@ -5,15 +5,15 @@ import type { TreeSummary, Role } from '@/types'
 const roleBadge: Record<Role, { label: string; className: string }> = {
   owner: {
     label: 'Owner',
-    className: 'bg-indigo-100 text-indigo-700',
+    className: 'bg-[var(--color-accent)]/10 text-[var(--color-accent)]',
   },
   editor: {
     label: 'Editor',
-    className: 'bg-amber-100 text-amber-700',
+    className: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]',
   },
   viewer: {
     label: 'Viewer',
-    className: 'bg-gray-100 text-gray-600',
+    className: 'bg-[var(--color-surface)] text-[var(--color-text-secondary)]',
   },
 }
 
@@ -28,10 +28,10 @@ export default function TreeCard({ tree }: { readonly tree: TreeSummary }) {
       onClick={() => {
         if (tree.partition_key) setPartitionKey(tree.partition_key)
       }}
-      className="block rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 overflow-hidden transform hover:scale-[1.02]"
+      className="block rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] shadow-sm hover:shadow-md hover:border-[var(--color-text-secondary)] transition-all duration-200 overflow-hidden transform hover:scale-[1.02]"
     >
       {/* Image banner */}
-      <div className="h-32 bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center">
+      <div className="h-32 bg-gradient-to-br from-[var(--color-accent)]/60 to-[var(--color-accent)]/80 flex items-center justify-center">
         {tree.image ? (
           <img
             src={tree.image}
@@ -58,7 +58,7 @@ export default function TreeCard({ tree }: { readonly tree: TreeSummary }) {
       {/* Card body */}
       <div className="p-4">
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="text-lg font-semibold text-gray-900 truncate">
+          <h3 className="text-lg font-semibold text-[var(--color-text-primary)] truncate">
             {tree.name || 'Unnamed Tree'}
           </h3>
           <span
@@ -69,12 +69,12 @@ export default function TreeCard({ tree }: { readonly tree: TreeSummary }) {
         </div>
 
         {tree.description && (
-          <p className="text-sm text-gray-500 line-clamp-2 mb-3">
+          <p className="text-sm text-[var(--color-text-secondary)] line-clamp-2 mb-3">
             {tree.description}
           </p>
         )}
 
-        <div className="flex items-center gap-1 text-sm text-gray-400">
+        <div className="flex items-center gap-1 text-sm text-[var(--color-text-tertiary)]">
           <svg
             className="w-4 h-4"
             fill="none"

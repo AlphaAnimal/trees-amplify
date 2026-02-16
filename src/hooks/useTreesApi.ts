@@ -179,6 +179,12 @@ export function useDeleteMember(partitionKey: string | null) {
     onSuccess: () => {
       if (partitionKey) {
         qc.invalidateQueries({ queryKey: queryKeys.members(partitionKey) })
+        // Invalidate all directRelations queries to refresh tree view
+        qc.invalidateQueries({
+          predicate: (query) =>
+            query.queryKey[0] === 'directRelations' &&
+            query.queryKey[1] === partitionKey,
+        })
       }
       qc.invalidateQueries({ queryKey: queryKeys.trees })
     },
@@ -265,6 +271,12 @@ export function useUpdateSpouseRelation(partitionKey: string | null) {
     onSuccess: () => {
       if (partitionKey) {
         qc.invalidateQueries({ queryKey: queryKeys.members(partitionKey) })
+        // Invalidate all directRelations queries to refresh tree view
+        qc.invalidateQueries({
+          predicate: (query) =>
+            query.queryKey[0] === 'directRelations' &&
+            query.queryKey[1] === partitionKey,
+        })
       }
     },
   })

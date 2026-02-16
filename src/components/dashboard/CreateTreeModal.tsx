@@ -136,14 +136,14 @@ export default function CreateTreeModal({ open, onClose }: Props) {
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto animate-in slide-up duration-300">
+      <div className="relative bg-[var(--color-surface-elevated)] rounded-2xl shadow-xl w-full max-w-lg min-w-[320px] mx-4 max-h-[90vh] overflow-y-auto animate-in slide-up duration-300">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)]">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">
               {step === 'tree' ? 'Create a New Tree' : 'Add First Member'}
             </h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-[var(--color-text-secondary)]">
               {step === 'tree'
                 ? 'Step 1 of 2 — Name your tree'
                 : 'Step 2 of 2 — Who is the first person in this tree?'}
@@ -151,7 +151,7 @@ export default function CreateTreeModal({ open, onClose }: Props) {
           </div>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+            className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] transition-colors cursor-pointer"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -162,7 +162,7 @@ export default function CreateTreeModal({ open, onClose }: Props) {
         {/* Body */}
         <div className="px-6 py-5">
           {error && (
-            <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            <div className="mb-4 rounded-lg bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 px-4 py-3 text-sm text-[var(--color-error)]">
               {error}
             </div>
           )}
@@ -170,8 +170,8 @@ export default function CreateTreeModal({ open, onClose }: Props) {
           {step === 'tree' ? (
             <form onSubmit={handleTreeSubmit} className="space-y-4">
               <div>
-                <label htmlFor="treeName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Tree Name <span className="text-red-500">*</span>
+                <label htmlFor="treeName" className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
+                  Tree Name <span className="text-[var(--color-error)]">*</span>
                 </label>
                 <input
                   id="treeName"
@@ -180,12 +180,12 @@ export default function CreateTreeModal({ open, onClose }: Props) {
                   value={treeName}
                   onChange={(e) => setTreeName(e.target.value)}
                   placeholder="e.g. The Smith Family"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
                 />
               </div>
 
               <div>
-                <label htmlFor="treeDesc" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="treeDesc" className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
                   Description
                 </label>
                 <textarea
@@ -194,7 +194,7 @@ export default function CreateTreeModal({ open, onClose }: Props) {
                   value={treeDescription}
                   onChange={(e) => setTreeDescription(e.target.value)}
                   placeholder="A brief description of this family tree…"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                  className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent resize-none"
                 />
               </div>
 
@@ -202,14 +202,14 @@ export default function CreateTreeModal({ open, onClose }: Props) {
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !treeName.trim()}
-                  className="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-5 py-2 text-sm font-medium text-white bg-[var(--color-accent)] rounded-lg hover:bg-[var(--color-accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {loading ? 'Creating…' : 'Next'}
                 </button>
@@ -219,8 +219,8 @@ export default function CreateTreeModal({ open, onClose }: Props) {
             <form onSubmit={handleMemberSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                    First Name <span className="text-red-500">*</span>
+                  <label htmlFor="firstName" className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
+                    First Name <span className="text-[var(--color-error)]">*</span>
                   </label>
                   <input
                     id="firstName"
@@ -229,12 +229,12 @@ export default function CreateTreeModal({ open, onClose }: Props) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="John"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                    Surname <span className="text-red-500">*</span>
+                  <label htmlFor="lastName" className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
+                    Surname <span className="text-[var(--color-error)]">*</span>
                   </label>
                   <input
                     id="lastName"
@@ -243,29 +243,29 @@ export default function CreateTreeModal({ open, onClose }: Props) {
                     value={surname}
                     onChange={(e) => setSurname(e.target.value)}
                     placeholder="Smith"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
-                    Gender <span className="text-red-500">*</span>
+                  <label htmlFor="gender" className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
+                    Gender <span className="text-[var(--color-error)]">*</span>
                   </label>
                   <select
                     id="gender"
                     value={gender}
                     onChange={(e) => setGender(e.target.value as Gender)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
                   >
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="born" className="block text-sm font-medium text-gray-700 mb-1">
-                    Date of Birth <span className="text-red-500">*</span>
+                  <label htmlFor="born" className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
+                    Date of Birth <span className="text-[var(--color-error)]">*</span>
                   </label>
                   <input
                     id="born"
@@ -273,26 +273,26 @@ export default function CreateTreeModal({ open, onClose }: Props) {
                     required
                     value={born}
                     onChange={(e) => setBorn(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="died" className="block text-sm font-medium text-gray-700 mb-1">
-                  Date of Death <span className="text-gray-400">(optional)</span>
+                <label htmlFor="died" className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
+                  Date of Death <span className="text-[var(--color-text-tertiary)]">(optional)</span>
                 </label>
                 <input
                   id="died"
                   type="date"
                   value={died}
                   onChange={(e) => setDied(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
                 />
               </div>
 
               <div>
-                <label htmlFor="memberDesc" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="memberDesc" className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
                   Description
                 </label>
                 <textarea
@@ -301,7 +301,7 @@ export default function CreateTreeModal({ open, onClose }: Props) {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Tell us about this person…"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                  className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent resize-none"
                 />
               </div>
 
@@ -310,7 +310,7 @@ export default function CreateTreeModal({ open, onClose }: Props) {
                   type="button"
                   onClick={() => setStep('tree')}
                   disabled={loading}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
                 >
                   Back
                 </button>
@@ -318,14 +318,14 @@ export default function CreateTreeModal({ open, onClose }: Props) {
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={loading || !name.trim() || !surname.trim() || !born}
-                    className="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-5 py-2 text-sm font-medium text-white bg-[var(--color-accent)] rounded-lg hover:bg-[var(--color-accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {loading ? 'Creating…' : 'Create Tree'}
                   </button>

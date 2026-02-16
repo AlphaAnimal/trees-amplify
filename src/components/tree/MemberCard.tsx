@@ -38,14 +38,13 @@ export default function MemberCard({
   return (
     <div
       className={`
-        relative flex flex-col items-center p-4 rounded-xl border-2 transition-all
-        min-w-[140px] max-w-[160px] shrink-0
+        relative flex flex-col items-center p-5 rounded-2xl border-2 transition-all duration-200
+        min-w-[240px] max-w-[280px] shrink-0
         ${
           isFocused
-            ? 'border-indigo-500 bg-indigo-50 shadow-md ring-2 ring-indigo-200'
-            : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
+            ? 'border-[var(--color-accent)] bg-[var(--color-accent)]/5 shadow-lg ring-2 ring-[var(--color-accent)]/20'
+            : 'border-[var(--color-border)] bg-[var(--color-surface-elevated)] hover:border-[var(--color-text-secondary)] hover:shadow-md'
         }
-        transition-all duration-200
       `}
     >
       {/* View Details Icon */}
@@ -55,7 +54,7 @@ export default function MemberCard({
             e.stopPropagation()
             onViewDetails()
           }}
-          className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-colors shadow-sm z-10 cursor-pointer"
+          className="absolute top-3 right-3 p-2 rounded-full bg-[var(--color-surface-elevated)]/90 hover:bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors shadow-md z-10 cursor-pointer backdrop-blur-sm"
           aria-label="View member details"
         >
           <svg
@@ -68,13 +67,7 @@ export default function MemberCard({
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+              d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
             />
           </svg>
         </button>
@@ -87,8 +80,8 @@ export default function MemberCard({
       {/* Avatar */}
       <div
         className={`
-          w-14 h-14 rounded-full flex items-center justify-center
-          text-white font-semibold text-lg mb-2 shadow-sm overflow-hidden
+          w-20 h-20 rounded-full flex items-center justify-center
+          text-white font-semibold text-xl mb-3 shadow-md overflow-hidden
           ${isMale ? 'bg-blue-500' : 'bg-pink-500'}
         `}
       >
@@ -107,22 +100,22 @@ export default function MemberCard({
       </div>
 
       {/* Name */}
-      <p className="text-sm font-semibold text-gray-900 text-center leading-tight">
+      <p className="text-base font-semibold text-[var(--color-text-primary)] text-center leading-tight mb-0.5">
         {member.name}
       </p>
-      <p className="text-sm text-gray-600 text-center leading-tight">
+      <p className="text-sm text-[var(--color-text-secondary)] text-center leading-tight mb-2">
         {member.surname}
       </p>
 
       {/* Lifespan */}
-      <p className="text-xs text-gray-400 mt-1.5">
+      <p className="text-xs text-[var(--color-text-tertiary)] mt-1">
         *{formatYear(member.born)}
         {member.died ? ` — †${formatYear(member.died)}` : ''}
       </p>
 
       {/* Marriage info for spouses */}
       {spouseInfo && (
-        <p className="text-xs text-amber-600 mt-1">
+        <p className="text-xs text-[var(--color-warning)] mt-1.5">
           ♥ {formatYear(spouseInfo.married)}
           {spouseInfo.divorced
             ? ` · div. ${formatYear(spouseInfo.divorced)}`

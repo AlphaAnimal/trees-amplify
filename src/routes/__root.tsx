@@ -4,6 +4,8 @@ import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { signOut } from 'aws-amplify/auth'
 import { useSignOut } from '../App'
+import ThemeToggle from '@/components/ThemeToggle'
+import { useTheme } from '@/hooks/useTheme'
 
 export const Route = createRootRoute({
   component: RootLayout,
@@ -16,6 +18,7 @@ function RootLayout() {
   const prevAuthStatus = useRef<string | null>(null)
   const prevUserId = useRef<string | null>(null)
   const isInitialMount = useRef(true)
+  useTheme() // Initialize theme
 
   // Wrap signOut - let the useEffect handle the redirect when auth status changes
   const handleSignOut = async () => {
@@ -81,29 +84,33 @@ function RootLayout() {
   }, [authStatus, user, queryClient])
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
-        <Link to="/" className="text-xl font-bold text-gray-900 hover:text-gray-700">
+    <div className="h-screen flex flex-col bg-[var(--color-background)] text-[var(--color-text-primary)] transition-colors overflow-hidden">
+      <nav className="bg-[var(--color-surface-elevated)] border-b border-[var(--color-border)] px-6 py-3 flex items-center justify-between shrink-0">
+        <Link 
+          to="/" 
+          className="text-xl font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-text-secondary)] transition-colors"
+        >
           Family Trees
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
           <Link
             to="/settings"
-            className="text-sm text-gray-600 hover:text-gray-900"
+            className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
           >
             Settings
           </Link>
           {signOutFromContext && (
             <button
               onClick={handleSignOut}
-              className="text-sm text-red-600 hover:text-red-800 cursor-pointer"
+              className="text-sm text-[var(--color-error)] hover:opacity-80 transition-opacity cursor-pointer"
             >
               Sign Out
             </button>
           )}
         </div>
       </nav>
-      <main>
+      <main className="flex-1 overflow-auto bg-[var(--color-background)]">
         <Outlet />
       </main>
     </div>

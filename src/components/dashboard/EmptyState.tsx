@@ -2,9 +2,9 @@ export default function EmptyState({ onCreateTree }: { onCreateTree: () => void 
   return (
     <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
       {/* Tree icon */}
-      <div className="mb-6 rounded-full bg-indigo-50 p-6">
+      <div className="mb-6 rounded-full bg-[var(--color-accent)]/10 p-6">
         <svg
-          className="w-16 h-16 text-indigo-400"
+          className="w-16 h-16 text-[var(--color-accent)]"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -18,17 +18,17 @@ export default function EmptyState({ onCreateTree }: { onCreateTree: () => void 
         </svg>
       </div>
 
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">
+      <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">
         No family trees yet
       </h2>
-      <p className="text-gray-500 max-w-md mb-8">
+      <p className="text-[var(--color-text-secondary)] max-w-md mb-8">
         Create your first family tree to start mapping out your ancestry, or ask
         someone to share an existing tree with you.
       </p>
 
       <button
         onClick={onCreateTree}
-        className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow-sm cursor-pointer"
+        className="px-6 py-3 bg-[var(--color-accent)] text-white rounded-lg font-medium hover:bg-[var(--color-accent-hover)] transition-colors shadow-sm cursor-pointer"
       >
         Create Your First Tree
       </button>

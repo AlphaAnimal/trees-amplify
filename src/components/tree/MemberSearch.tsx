@@ -30,9 +30,9 @@ export default function MemberSearch({ members, onSelect }: MemberSearchProps) {
 
   return (
     <div ref={ref} className="relative">
-      <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-1.5">
+      <div className="flex items-center gap-2 bg-[var(--color-surface)] rounded-lg px-3 py-1.5">
         <svg
-          className="w-4 h-4 text-gray-400 shrink-0"
+          className="w-4 h-4 text-[var(--color-text-tertiary)] shrink-0"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -53,7 +53,7 @@ export default function MemberSearch({ members, onSelect }: MemberSearchProps) {
           }}
           onFocus={() => setIsOpen(true)}
           placeholder="Search members…"
-          className="bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none w-44"
+          className="bg-transparent text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-tertiary)] outline-none w-44"
         />
         {query && (
           <button
@@ -61,7 +61,7 @@ export default function MemberSearch({ members, onSelect }: MemberSearchProps) {
               setQuery('')
               setIsOpen(false)
             }}
-            className="text-gray-400 hover:text-gray-600 cursor-pointer"
+            className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] cursor-pointer transition-colors"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -71,7 +71,7 @@ export default function MemberSearch({ members, onSelect }: MemberSearchProps) {
       </div>
 
       {isOpen && filtered.length > 0 && (
-        <div className="absolute top-full right-0 mt-1 w-72 bg-white rounded-lg shadow-lg border border-gray-200 max-h-64 overflow-y-auto z-50">
+        <div className="absolute top-full right-0 mt-1 w-72 bg-[var(--color-surface-elevated)] rounded-lg shadow-lg border border-[var(--color-border)] max-h-64 overflow-y-auto z-50">
           {filtered.map((m) => (
             <button
               key={m.id}
@@ -80,7 +80,7 @@ export default function MemberSearch({ members, onSelect }: MemberSearchProps) {
                 setQuery('')
                 setIsOpen(false)
               }}
-              className="w-full px-3 py-2.5 text-left hover:bg-gray-50 flex items-center gap-3 text-sm transition-colors cursor-pointer"
+              className="w-full px-3 py-2.5 text-left hover:bg-[var(--color-surface)] flex items-center gap-3 text-sm transition-colors cursor-pointer"
             >
               <div
                 className={`
@@ -93,10 +93,10 @@ export default function MemberSearch({ members, onSelect }: MemberSearchProps) {
                 {m.surname.charAt(0)}
               </div>
               <div className="min-w-0">
-                <p className="font-medium text-gray-900 truncate">
+                <p className="font-medium text-[var(--color-text-primary)] truncate">
                   {m.name} {m.surname}
                 </p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-[var(--color-text-tertiary)]">
                   *{new Date(m.born).getFullYear()}
                   {m.died ? ` — †${new Date(m.died).getFullYear()}` : ''}
                 </p>
@@ -107,8 +107,8 @@ export default function MemberSearch({ members, onSelect }: MemberSearchProps) {
       )}
 
       {isOpen && query.trim() && filtered.length === 0 && (
-        <div className="absolute top-full right-0 mt-1 w-72 bg-white rounded-lg shadow-lg border border-gray-200 px-4 py-3 z-50">
-          <p className="text-sm text-gray-500">No members found</p>
+        <div className="absolute top-full right-0 mt-1 w-72 bg-[var(--color-surface-elevated)] rounded-lg shadow-lg border border-[var(--color-border)] px-4 py-3 z-50">
+          <p className="text-sm text-[var(--color-text-secondary)]">No members found</p>
         </div>
       )}
     </div>

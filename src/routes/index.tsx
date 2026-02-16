@@ -24,9 +24,9 @@ function DashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Trees</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">My Trees</h1>
           {trees.length > 0 && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-[var(--color-text-secondary)] mt-1">
               {trees.length} {trees.length === 1 ? 'tree' : 'trees'}
             </p>
           )}
@@ -34,7 +34,7 @@ function DashboardPage() {
         {trees.length > 0 && (
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm cursor-pointer"
+            className="px-4 py-2 bg-[var(--color-accent)] text-white text-sm font-medium rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors shadow-sm cursor-pointer"
           >
             Create Tree
           </button>
@@ -45,8 +45,8 @@ function DashboardPage() {
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
-            <p className="text-sm text-gray-500">Loading your trees…</p>
+            <div className="w-8 h-8 border-4 border-[var(--color-border)] border-t-[var(--color-accent)] rounded-full animate-spin" />
+            <p className="text-sm text-[var(--color-text-secondary)]">Loading your trees…</p>
           </div>
         </div>
       ) : isError ? (
