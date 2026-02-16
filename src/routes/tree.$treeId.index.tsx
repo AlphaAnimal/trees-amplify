@@ -261,22 +261,21 @@ function TreeViewPage() {
 
             {/* ── Focused Member + Spouses Row ─────────────────────── */}
             <div className="relative w-full flex items-center min-h-[300px]">
-              {/* Focused member - absolutely centered */}
-              <div className="absolute left-1/2 -translate-x-1/2 z-10">
-                <MemberCard
-                  member={relations.member}
-                  isFocused
-                  onClick={() => {}} // Already focused, no action needed
-                  onViewDetails={() => handleMemberCardClick(relations.member.id)}
-                />
+              {/* Focused member - absolutely centered with background to cover spouses */}
+              <div className="absolute left-1/2 -translate-x-1/2 z-20">
+                <div className="bg-[var(--color-background)] px-3 py-2 -mx-3 -my-2 rounded-2xl">
+                  <MemberCard
+                    member={relations.member}
+                    isFocused
+                    onClick={() => {}} // Already focused, no action needed
+                    onViewDetails={() => handleMemberCardClick(relations.member.id)}
+                  />
+                </div>
               </div>
 
-              {/* Spouses container - positioned to start right after focused member, scrollable */}
-              <div className="w-full flex items-center overflow-x-auto overflow-y-hidden px-4">
-                <div 
-                  className="flex items-center gap-4 min-w-max"
-                  style={{ marginLeft: 'calc(50% + 140px)' }}
-                >
+              {/* Spouses container - only on right side, scrollable */}
+              <div className="absolute left-1/2 flex items-center overflow-x-auto overflow-y-hidden pr-4 spouse-scroll-container" style={{ width: 'calc(50% - 140px)', marginLeft: '140px' }}>
+                <div className="flex items-center gap-4 min-w-max">
                   {[...relations.spouses]
                     .sort((a, b) => {
                       // Sort by marriage date (ascending - earliest first)
@@ -344,15 +343,17 @@ function TreeViewPage() {
                   />
                 )}
 
-                <div className="flex items-start justify-center gap-6 overflow-x-auto max-w-full pb-4 px-4">
-                  {relations.children.map((child) => (
-                    <MemberCard
-                      key={child.id}
-                      member={child}
-                      onClick={() => handleMemberClick(child.id)}
-                      onViewDetails={() => handleMemberCardClick(child.id)}
-                    />
-                  ))}
+                <div className="w-full overflow-x-auto overflow-y-hidden pb-4 px-4 spouse-scroll-container">
+                  <div className="flex items-start justify-center gap-6 min-w-max">
+                    {relations.children.map((child) => (
+                      <MemberCard
+                        key={child.id}
+                        member={child}
+                        onClick={() => handleMemberClick(child.id)}
+                        onViewDetails={() => handleMemberCardClick(child.id)}
+                      />
+                    ))}
+                  </div>
                 </div>
               </>
             )}

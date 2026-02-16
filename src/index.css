@@ -229,3 +229,29 @@ body {
 .slide-up {
   animation: slide-up 0.3s ease-out;
 }
+
+/* Custom scrollbar styling */
+.spouse-scroll-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.spouse-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.spouse-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.spouse-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary);
+}
+
+.dark .spouse-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--color-border-dark);
+}
+
+.dark .spouse-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary-dark);
+}

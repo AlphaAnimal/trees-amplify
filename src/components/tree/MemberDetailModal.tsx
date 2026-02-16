@@ -98,6 +98,8 @@ export default function MemberDetailModal({
   const [showDeleteError, setShowDeleteError] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [lightboxIndex, setLightboxIndex] = useState(0)
   const picInputRef = useRef<HTMLInputElement>(null)
   const photosInputRef = useRef<HTMLInputElement>(null)
 
@@ -107,13 +109,51 @@ export default function MemberDetailModal({
 
     function handleEscape(e: KeyboardEvent) {
       if (e.key === 'Escape') {
-        onClose()
+        if (lightboxOpen) {
+          setLightboxOpen(false)
+        } else {
+          onClose()
+        }
       }
     }
 
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
-  }, [open, onClose])
+  }, [open, onClose, lightboxOpen])
+
+  // ─── Lightbox keyboard navigation ────────────────────────────────────
+  useEffect(() => {
+    const photosUrls = photosData?.urls ?? []
+    if (!lightboxOpen || photosUrls.length === 0) return
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        setLightboxIndex((prev) => (prev > 0 ? prev - 1 : photosUrls.length - 1))
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        setLightboxIndex((prev) => (prev < photosUrls.length - 1 ? prev + 1 : 0))
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [lightboxOpen, photosData?.urls])
+
+  // ─── Open lightbox ─────────────────────────────────────────────────────
+  function openLightbox(index: number) {
+    setLightboxIndex(index)
+    setLightboxOpen(true)
+  }
+
+  // ─── Navigate lightbox ────────────────────────────────────────────────
+  function goToPrevious() {
+    setLightboxIndex((prev) => (prev > 0 ? prev - 1 : photosUrls.length - 1))
+  }
+
+  function goToNext() {
+    setLightboxIndex((prev) => (prev < photosUrls.length - 1 ? prev + 1 : 0))
+  }
 
   // ─── Upload handlers ───────────────────────────────────────────────
   async function handlePicUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -469,7 +509,8 @@ export default function MemberDetailModal({
                     {photosUrls.map((url, idx) => (
                       <div
                         key={idx}
-                        className="aspect-square rounded-lg overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)] transition-transform hover:scale-105"
+                        className="aspect-square rounded-lg overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)] transition-transform hover:scale-105 cursor-pointer"
+                        onClick={() => openLightbox(idx)}
                       >
                         <img
                           src={url}
@@ -719,6 +760,79 @@ export default function MemberDetailModal({
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── Photo Lightbox ──────────────────────────────────────────────── */}
+      {lightboxOpen && photosUrls.length > 0 && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/95">
+          {/* Close Button */}
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-4 right-4 z-10 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors cursor-pointer"
+            aria-label="Close lightbox"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          {/* Previous Button */}
+          {photosUrls.length > 1 && (
+            <button
+              onClick={goToPrevious}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors cursor-pointer"
+              aria-label="Previous photo"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+          )}
+
+          {/* Next Button */}
+          {photosUrls.length > 1 && (
+            <button
+              onClick={goToNext}
+              className="absolute right-16 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors cursor-pointer"
+              aria-label="Next photo"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          )}
+
+          {/* Image Container */}
+          <div className="relative w-full h-full flex items-center justify-center p-4">
+            <img
+              src={photosUrls[lightboxIndex]}
+              alt={`Photo ${lightboxIndex + 1} of ${photosUrls.length} - ${member.name} ${member.surname}`}
+              className="max-w-full max-h-full object-contain"
+            />
+          </div>
+
+          {/* Photo Counter */}
+          {photosUrls.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-black/50 text-white text-sm">
+              {lightboxIndex + 1} / {photosUrls.length}
+            </div>
+          )}
         </div>
       )}
     </div>
