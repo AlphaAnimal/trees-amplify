@@ -66,8 +66,6 @@ export interface TreeSummary {
   partition_key: string | null
   member_count: number
   name?: string | null
-  description?: string | null
-  image?: string | null
 }
 
 export interface ListTreesResponse {

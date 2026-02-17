@@ -7,6 +7,7 @@ import { routeTree } from './routeTree.gen'
 import MinimumScreenSize from './components/MinimumScreenSize'
 import ErrorBoundary from './components/ErrorBoundary'
 import { useTheme } from './hooks/useTheme'
+import { SignOutContext } from './contexts/SignOutContext'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,15 +46,4 @@ export default function App() {
       </MinimumScreenSize>
     </ErrorBoundary>
   )
-}
-
-// Context so any component (e.g. the navbar) can trigger sign-out
-import { createContext, useContext } from 'react'
-
-type SignOutFn = (() => void) | undefined
-
-export const SignOutContext = createContext<SignOutFn>(undefined)
-
-export function useSignOut() {
-  return useContext(SignOutContext)
 }

@@ -14,7 +14,7 @@ function HelpPage() {
         Help & Documentation
       </h1>
       <p className="text-[var(--color-text-secondary)] mb-8">
-        Learn how to create and manage your family trees
+        Learn how to create and manage your trees
       </p>
 
       <div className="space-y-8">
@@ -25,7 +25,7 @@ function HelpPage() {
           </h2>
           <div className="space-y-4 text-[var(--color-text-secondary)]">
             <p>
-              Welcome to Family Trees! This app helps you create and visualize family trees for your own family or fictional characters.
+              Welcome to Trees Lab! This app helps you create and visualize trees for your own family or fictional characters.
             </p>
             <div>
               <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-2">

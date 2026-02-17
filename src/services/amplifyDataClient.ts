@@ -5,15 +5,11 @@ const client = generateClient<Schema>()
 
 export interface AmplifyTreeInput {
   name: string
-  description?: string
-  image?: string
 }
 
 export interface AmplifyTree {
   id: string
   name: string | null
-  description: string | null
-  image: string | null
   createdAt: string
   updatedAt: string
   owner: string | null

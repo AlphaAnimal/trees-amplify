@@ -3,7 +3,7 @@ import { useAuthenticator } from '@aws-amplify/ui-react'
 import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { signOut } from 'aws-amplify/auth'
-import { useSignOut } from '../App'
+import { useSignOut } from '../contexts/SignOutContext'
 import ThemeToggle from '@/components/ThemeToggle'
 import { useTheme } from '@/hooks/useTheme'
 
@@ -90,7 +90,7 @@ function RootLayout() {
           to="/" 
           className="text-xl font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-text-secondary)] transition-colors"
         >
-          Family Trees
+          Trees Lab
         </Link>
         <div className="flex items-center gap-3">
           <ThemeToggle />

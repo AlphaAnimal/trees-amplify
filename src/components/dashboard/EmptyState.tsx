@@ -19,10 +19,10 @@ export default function EmptyState({ onCreateTree }: { onCreateTree: () => void 
       </div>
 
       <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">
-        No family trees yet
+        No trees yet
       </h2>
       <p className="text-[var(--color-text-secondary)] mb-8">
-        Create your first family tree to start mapping out your ancestry, or ask
+        Create your first tree to start mapping out your ancestry, or ask
         someone to share an existing tree with you.
       </p>
 

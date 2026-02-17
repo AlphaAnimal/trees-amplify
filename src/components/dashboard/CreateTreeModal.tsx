@@ -23,7 +23,6 @@ export default function CreateTreeModal({ open, onClose }: Props) {
 
   // ─── step 1: tree metadata ──────────────────────────────────────────
   const [treeName, setTreeName] = useState('')
-  const [treeDescription, setTreeDescription] = useState('')
   const [amplifyTreeId, setAmplifyTreeId] = useState<string | null>(null)
 
   // ─── step 2: first member ───────────────────────────────────────────
@@ -41,7 +40,6 @@ export default function CreateTreeModal({ open, onClose }: Props) {
     setLoading(false)
     setError(null)
     setTreeName('')
-    setTreeDescription('')
     setAmplifyTreeId(null)
     setName('')
     setSurname('')
@@ -79,7 +77,6 @@ export default function CreateTreeModal({ open, onClose }: Props) {
     try {
       const tree = await amplifyTreesApi.create({
         name: treeName.trim(),
-        description: treeDescription.trim() || undefined,
       })
       setAmplifyTreeId(tree.id)
       setStep('member')
@@ -181,20 +178,6 @@ export default function CreateTreeModal({ open, onClose }: Props) {
                   onChange={(e) => setTreeName(e.target.value)}
                   placeholder="e.g. The Smith Family"
                   className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="treeDesc" className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
-                  Description
-                </label>
-                <textarea
-                  id="treeDesc"
-                  rows={3}
-                  value={treeDescription}
-                  onChange={(e) => setTreeDescription(e.target.value)}
-                  placeholder="A brief description of this family tree…"
-                  className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent resize-none"
                 />
               </div>
 

@@ -30,31 +30,6 @@ export default function TreeCard({ tree }: { readonly tree: TreeSummary }) {
       }}
       className="block rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] shadow-sm hover:shadow-md hover:border-[var(--color-text-secondary)] transition-all duration-200 overflow-hidden transform hover:scale-[1.02]"
     >
-      {/* Image banner */}
-      <div className="h-32 bg-gradient-to-br from-[var(--color-accent)]/60 to-[var(--color-accent)]/80 flex items-center justify-center">
-        {tree.image ? (
-          <img
-            src={tree.image}
-            alt={tree.name ?? 'Tree'}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <svg
-            className="w-12 h-12 text-white/60"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
-            />
-          </svg>
-        )}
-      </div>
-
       {/* Card body */}
       <div className="p-4">
         <div className="flex items-start justify-between gap-2 mb-2">
@@ -67,12 +42,6 @@ export default function TreeCard({ tree }: { readonly tree: TreeSummary }) {
             {badge.label}
           </span>
         </div>
-
-        {tree.description && (
-          <p className="text-sm text-[var(--color-text-secondary)] line-clamp-2 mb-3">
-            {tree.description}
-          </p>
-        )}
 
         <div className="flex items-center gap-1 text-sm text-[var(--color-text-tertiary)]">
           <svg

@@ -123,6 +123,11 @@ function AccessControlPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Access Control</h1>
+          {tree?.name && (
+            <p className="text-base font-medium text-[var(--color-text-primary)] mt-1">
+              {tree.name}
+            </p>
+          )}
           <p className="text-sm text-[var(--color-text-secondary)] mt-1">
             Manage who can view and edit this tree
           </p>
