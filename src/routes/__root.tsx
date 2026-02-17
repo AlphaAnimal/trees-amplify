@@ -95,6 +95,12 @@ function RootLayout() {
         <div className="flex items-center gap-3">
           <ThemeToggle />
           <Link
+            to="/help"
+            className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+          >
+            Help
+          </Link>
+          <Link
             to="/settings"
             className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
           >
