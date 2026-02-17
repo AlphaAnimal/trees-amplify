@@ -114,24 +114,6 @@ function SettingsPage() {
                 </label>
                 <p className="text-sm text-[var(--color-text-primary)]">{user?.email || 'Not available'}</p>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
-                  Email Verified
-                </label>
-                <p className="text-sm text-[var(--color-text-primary)]">
-                  {user?.email_verified ? (
-                    <span className="text-[var(--color-success)]">✓ Verified</span>
-                  ) : (
-                    <span className="text-[var(--color-warning)]">Not verified</span>
-                  )}
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
-                  User ID
-                </label>
-                <p className="text-sm text-[var(--color-text-secondary)] font-mono">{user?.user_id || 'N/A'}</p>
-              </div>
             </div>
           </div>
 
