@@ -6,6 +6,7 @@ import { getPartitionKey } from '@/services/flaskService'
 import MemberCard from '@/components/tree/MemberCard'
 import MemberSearch from '@/components/tree/MemberSearch'
 import DeleteTreeModal from '@/components/tree/DeleteTreeModal'
+import QuitTreeModal from '@/components/tree/QuitTreeModal'
 import MemberDetailModal from '@/components/tree/MemberDetailModal'
 import MemberFormModal from '@/components/tree/MemberFormModal'
 import MarriageEditModal from '@/components/tree/MarriageEditModal'
@@ -26,6 +27,7 @@ function TreeViewPage() {
   const navigate = useNavigate()
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showQuitModal, setShowQuitModal] = useState(false)
   const [detailModalMemberId, setDetailModalMemberId] = useState<string | null>(null)
   const [formModalMode, setFormModalMode] = useState<
     'create-child' | 'create-parent' | 'create-spouse' | 'edit' | null
@@ -174,7 +176,7 @@ function TreeViewPage() {
             </Link>
           )}
 
-          {isOwner && (
+          {isOwner ? (
             <button
               onClick={() => setShowDeleteModal(true)}
               className="text-sm text-[var(--color-error)] hover:opacity-80 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-[var(--color-error)]/10 transition-colors shrink-0 cursor-pointer"
@@ -193,6 +195,26 @@ function TreeViewPage() {
                 />
               </svg>
               <span className="hidden sm:inline">Delete</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowQuitModal(true)}
+              className="text-sm text-[var(--color-warning)] hover:opacity-80 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-[var(--color-warning)]/10 transition-colors shrink-0 cursor-pointer"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+              </svg>
+              <span className="hidden sm:inline">Quit</span>
             </button>
           )}
         </div>
@@ -441,6 +463,14 @@ function TreeViewPage() {
       <DeleteTreeModal
         open={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
+        treeId={treeId}
+        treeName={treeName}
+      />
+
+      {/* ── Quit Modal ───────────────────────────────────────────── */}
+      <QuitTreeModal
+        open={showQuitModal}
+        onClose={() => setShowQuitModal(false)}
         treeId={treeId}
         treeName={treeName}
       />

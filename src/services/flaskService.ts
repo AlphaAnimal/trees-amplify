@@ -162,6 +162,12 @@ export const treesApi = {
       ...withPartition(),
       method: 'DELETE',
     }),
+
+  quit: () =>
+    request<{ message: string }>('/trees/quit', {
+      ...withPartition(),
+      method: 'POST',
+    }),
 }
 
 // ─── Members ─────────────────────────────────────────────────────────────────

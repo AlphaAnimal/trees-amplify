@@ -1,30 +1,10 @@
 /* Amplify Authenticator Theme Overrides */
 
-/* Light Theme */
-[data-theme="light"] .amplify-authenticator,
-[data-theme="light"] .amplify-authenticator * {
+/* Map our theme variables to Amplify's theme variables */
+[data-amplify-theme] {
   --amplify-colors-background-primary: var(--color-background);
   --amplify-colors-background-secondary: var(--color-surface);
-  --amplify-colors-border-primary: var(--color-border);
-  --amplify-colors-border-secondary: var(--color-border-subtle);
-  --amplify-colors-font-primary: var(--color-text-primary);
-  --amplify-colors-font-secondary: var(--color-text-secondary);
-  --amplify-colors-font-tertiary: var(--color-text-tertiary);
-  --amplify-colors-brand-primary-60: var(--color-accent);
-  --amplify-colors-brand-primary-80: var(--color-accent-hover);
-  --amplify-colors-font-error: var(--color-error);
-  --amplify-colors-background-error: var(--color-error);
-  --amplify-radii-small: var(--radius-sm);
-  --amplify-radii-medium: var(--radius-md);
-  --amplify-radii-large: var(--radius-lg);
-  --amplify-fonts-default-variable: var(--font-sans);
-}
-
-/* Dark Theme */
-[data-theme="dark"] .amplify-authenticator,
-[data-theme="dark"] .amplify-authenticator * {
-  --amplify-colors-background-primary: var(--color-background);
-  --amplify-colors-background-secondary: var(--color-surface);
+  --amplify-colors-background-tertiary: var(--color-surface-elevated);
   --amplify-colors-border-primary: var(--color-border);
   --amplify-colors-border-secondary: var(--color-border-subtle);
   --amplify-colors-font-primary: var(--color-text-primary);
@@ -45,6 +25,21 @@
   font-family: var(--font-sans);
   background-color: var(--color-background);
   color: var(--color-text-primary);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+/* Center the actual card/container - target all possible card elements */
+.amplify-authenticator > div,
+.amplify-authenticator > section,
+[class*="amplify-card"],
+[class*="amplify-authenticator__container"] {
+  margin: 0 auto !important;
+  display: flex;
+  flex-direction: column;
 }
 
 .amplify-tabs {
@@ -87,4 +82,3 @@
 .amplify-button--link:hover {
   color: var(--color-accent-hover);
 }
-

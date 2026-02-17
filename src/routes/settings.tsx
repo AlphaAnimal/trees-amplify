@@ -27,6 +27,8 @@ function SettingsPage() {
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+
   // ─── Password Change ────────────────────────────────────────────────
   async function handlePasswordChange(e: { preventDefault: () => void }) {
     e.preventDefault()
@@ -54,7 +56,7 @@ function SettingsPage() {
       setNewPassword('')
       setConfirmPassword('')
       setShowPasswordModal(false)
-      alert('Password changed successfully')
+      setShowSuccessModal(true)
     } catch (err) {
       setPasswordError(
         err instanceof Error ? err.message : 'Failed to change password',
@@ -138,7 +140,7 @@ function SettingsPage() {
             <h2 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Change Password</h2>
             <button
               onClick={() => setShowPasswordModal(true)}
-              className="px-4 py-2 text-sm font-medium text-[var(--color-accent)] bg-[var(--color-accent)]/10 rounded-lg hover:bg-[var(--color-accent)]/20 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-[var(--color-accent)] bg-[var(--color-accent)]/10 rounded-lg hover:bg-[var(--color-accent)]/20 transition-colors cursor-pointer"
             >
               Change Password
             </button>
@@ -153,7 +155,7 @@ function SettingsPage() {
             </p>
             <button
               onClick={() => setShowDeleteModal(true)}
-              className="px-4 py-2 text-sm font-medium text-white bg-[var(--color-error)] rounded-lg hover:opacity-90 transition-opacity"
+              className="px-4 py-2 text-sm font-medium text-white bg-[var(--color-error)] rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
             >
               Delete Account
             </button>
@@ -176,7 +178,7 @@ function SettingsPage() {
             }}
             aria-label="Close modal"
           />
-          <div className="relative bg-[var(--color-surface-elevated)] rounded-2xl shadow-2xl w-full max-w-md mx-4">
+          <div className="relative bg-[var(--color-surface-elevated)] rounded-2xl shadow-2xl w-full max-w-md min-w-[320px] mx-4 max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-5">
               <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Change Password</h3>
 
@@ -251,14 +253,14 @@ function SettingsPage() {
                       setConfirmPassword('')
                     }}
                     disabled={passwordLoading}
-                    className="px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer disabled:cursor-not-allowed"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={passwordLoading || !oldPassword || !newPassword || !confirmPassword}
-                    className="px-5 py-2 text-sm font-medium text-white bg-[var(--color-accent)] rounded-lg hover:bg-[var(--color-accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-5 py-2 text-sm font-medium text-white bg-[var(--color-accent)] rounded-lg hover:bg-[var(--color-accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                   >
                     {passwordLoading ? 'Changing…' : 'Change Password'}
                   </button>
@@ -282,7 +284,7 @@ function SettingsPage() {
             }}
             aria-label="Close modal"
           />
-          <div className="relative bg-[var(--color-surface-elevated)] rounded-2xl shadow-2xl w-full max-w-md mx-4">
+          <div className="relative bg-[var(--color-surface-elevated)] rounded-2xl shadow-2xl w-full max-w-md min-w-[320px] mx-4 max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-5">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-full bg-[var(--color-error)]/10 flex items-center justify-center shrink-0">
@@ -342,16 +344,62 @@ function SettingsPage() {
                     setDeleteConfirm('')
                   }}
                   disabled={deleteLoading}
-                  className="px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteAccount}
                   disabled={deleteLoading || deleteConfirm !== 'DELETE'}
-                  className="px-5 py-2 text-sm font-medium text-white bg-[var(--color-error)] rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                  className="px-5 py-2 text-sm font-medium text-white bg-[var(--color-error)] rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer"
                 >
                   {deleteLoading ? 'Deleting…' : 'Delete Forever'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Success Modal ───────────────────────────────────────────────── */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowSuccessModal(false)}
+            aria-label="Close modal"
+          />
+          <div className="relative bg-[var(--color-surface-elevated)] rounded-2xl shadow-2xl w-full max-w-md min-w-[320px] mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-[var(--color-success)]/10 flex items-center justify-center shrink-0">
+                  <svg
+                    className="w-5 h-5 text-[var(--color-success)]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">Password Changed</h3>
+                  <p className="text-sm text-[var(--color-text-secondary)]">Your password has been updated successfully</p>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowSuccessModal(false)}
+                  className="px-5 py-2 text-sm font-medium text-white bg-[var(--color-accent)] rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors cursor-pointer"
+                >
+                  OK
                 </button>
               </div>
             </div>

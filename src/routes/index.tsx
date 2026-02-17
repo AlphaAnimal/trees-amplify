@@ -20,50 +20,65 @@ function DashboardPage() {
   const trees = data?.trees ?? []
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">My Trees</h1>
-          {trees.length > 0 && (
-            <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-              {trees.length} {trees.length === 1 ? 'tree' : 'trees'}
-            </p>
-          )}
-        </div>
-        {trees.length > 0 && (
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-[var(--color-accent)] text-white text-sm font-medium rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors shadow-sm cursor-pointer"
-          >
-            Create Tree
-          </button>
-        )}
-      </div>
-
-      {/* Content */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-4 border-[var(--color-border)] border-t-[var(--color-accent)] rounded-full animate-spin" />
-            <p className="text-sm text-[var(--color-text-secondary)]">Loading your trees…</p>
+    <>
+      {trees.length === 0 && !isLoading && !isError ? (
+        // Full width layout for empty state
+        <div className="w-full">
+          <div className="max-w-6xl mx-auto px-6 py-8">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">My Trees</h1>
+              </div>
+            </div>
           </div>
+          <EmptyState onCreateTree={() => setShowCreateModal(true)} />
         </div>
-      ) : isError ? (
-        <div className="animate-in fade-in duration-300">
-          <ErrorMessage
-            title="Failed to load trees"
-            message={error?.message || 'An unknown error occurred'}
-            onRetry={() => window.location.reload()}
-          />
-        </div>
-      ) : trees.length === 0 ? (
-        <EmptyState onCreateTree={() => setShowCreateModal(true)} />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-300">
-          {trees.map((tree) => (
-            <TreeCard key={tree.tree_id} tree={tree} />
-          ))}
+        // Normal constrained layout for content
+        <div className="max-w-6xl mx-auto px-6 py-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">My Trees</h1>
+              {trees.length > 0 && (
+                <p className="text-sm text-[var(--color-text-secondary)] mt-1">
+                  {trees.length} {trees.length === 1 ? 'tree' : 'trees'}
+                </p>
+              )}
+            </div>
+            {trees.length > 0 && (
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="px-4 py-2 bg-[var(--color-accent)] text-white text-sm font-medium rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors shadow-sm cursor-pointer"
+              >
+                Create Tree
+              </button>
+            )}
+          </div>
+
+          {/* Content */}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-8 h-8 border-4 border-[var(--color-border)] border-t-[var(--color-accent)] rounded-full animate-spin" />
+                <p className="text-sm text-[var(--color-text-secondary)]">Loading your trees…</p>
+              </div>
+            </div>
+          ) : isError ? (
+            <div className="animate-in fade-in duration-300">
+              <ErrorMessage
+                title="Failed to load trees"
+                message={error?.message || 'An unknown error occurred'}
+                onRetry={() => window.location.reload()}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-300">
+              {trees.map((tree) => (
+                <TreeCard key={tree.tree_id} tree={tree} />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -72,6 +87,6 @@ function DashboardPage() {
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
       />
-    </div>
+    </>
   )
 }

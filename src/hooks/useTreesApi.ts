@@ -103,6 +103,17 @@ export function useDeleteTree() {
   })
 }
 
+export function useQuitTree() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: treesApi.quit,
+    onSuccess: () => {
+      setPartitionKey(null)
+      qc.invalidateQueries({ queryKey: queryKeys.trees })
+    },
+  })
+}
+
 // ─── Members ─────────────────────────────────────────────────────────────────
 
 export function useMembers(

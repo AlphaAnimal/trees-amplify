@@ -1,6 +1,6 @@
 export default function EmptyState({ onCreateTree }: { onCreateTree: () => void }) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
+    <div className="flex flex-col items-center justify-center py-20 w-full text-center">
       {/* Tree icon */}
       <div className="mb-6 rounded-full bg-[var(--color-accent)]/10 p-6">
         <svg
@@ -21,7 +21,7 @@ export default function EmptyState({ onCreateTree }: { onCreateTree: () => void 
       <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">
         No family trees yet
       </h2>
-      <p className="text-[var(--color-text-secondary)] max-w-md mb-8">
+      <p className="text-[var(--color-text-secondary)] mb-8">
         Create your first family tree to start mapping out your ancestry, or ask
         someone to share an existing tree with you.
       </p>
