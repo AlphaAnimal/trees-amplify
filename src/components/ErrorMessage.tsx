@@ -13,7 +13,7 @@ export default function ErrorMessage({
 }: Props) {
   return (
     <div
-      className={`rounded-lg bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 px-4 py-3 text-sm text-[var(--color-error)] animate-in fade-in duration-200 ${className}`}
+      className={`rounded-lg bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 px-4 py-3 text-sm text-[var(--color-error)] animate-in fade-in duration-200 w-full ${className}`}
     >
       <div className="flex items-start gap-3">
         <svg
@@ -29,13 +29,13 @@ export default function ErrorMessage({
             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <div className="flex-1 min-w-0">
-          <p className="font-medium">{title}</p>
-          <p className="mt-1 break-words">{message}</p>
+        <div className="flex-1 min-w-[200px]">
+          <p className="font-medium break-words">{title}</p>
+          <p className="mt-1 break-words whitespace-normal">{message}</p>
           {onRetry && (
             <button
               onClick={onRetry}
-              className="mt-2 text-xs font-medium text-[var(--color-error)] hover:opacity-80 underline cursor-pointer transition-opacity"
+              className="mt-2 text-xs font-medium text-[var(--color-error)] hover:opacity-80 underline cursor-pointer transition-opacity inline-block whitespace-nowrap"
             >
               Try again
             </button>

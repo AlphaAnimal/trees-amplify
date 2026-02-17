@@ -230,8 +230,8 @@ function TreeViewPage() {
             </div>
           </div>
         ) : hasError ? (
-          <div className="flex items-center justify-center h-full px-6">
-            <div className="max-w-md w-full animate-in fade-in duration-300">
+          <div className="flex items-center justify-center h-full px-6 py-8">
+            <div className="w-full max-w-md min-w-[280px] animate-in fade-in duration-300">
               <ErrorMessage
                 title="Failed to load tree"
                 message={errorMessage}
