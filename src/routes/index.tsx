@@ -28,6 +28,9 @@ function DashboardPage() {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">My Trees</h1>
+                <p className="text-sm text-[var(--color-text-secondary)] mt-1">
+                  0/5 trees
+                </p>
               </div>
             </div>
           </div>
@@ -42,7 +45,7 @@ function DashboardPage() {
               <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">My Trees</h1>
               {trees.length > 0 && (
                 <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-                  {trees.length} {trees.length === 1 ? 'tree' : 'trees'}
+                  {trees.length}/5 trees
                 </p>
               )}
             </div>

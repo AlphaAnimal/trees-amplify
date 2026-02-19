@@ -72,15 +72,16 @@ async function request<T>(endpoint: string, opts: RequestOptions = {}): Promise<
 
     if (!response.ok) {
       const body = await response.json().catch(() => ({}))
-      const message = (body as Record<string, string>)?.error || 
-                      (body as Record<string, string>)?.message ||
+      const message = (body as Record<string, string>)?.message || 
+                      (body as Record<string, string>)?.error ||
                       `HTTP ${response.status}: ${response.statusText}`
       
       // Handle specific error codes
       if (response.status === 401) {
         throw new Error('Authentication required. Please sign in again.')
       } else if (response.status === 403) {
-        throw new Error('You do not have permission to perform this action.')
+        // Use the actual error message from backend (e.g., tree limit, storage limit)
+        throw new Error(message || 'You do not have permission to perform this action.')
       } else if (response.status === 404) {
         throw new Error('Resource not found.')
       } else if (response.status === 409) {

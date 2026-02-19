@@ -291,6 +291,46 @@ function HelpPage() {
           </div>
         </section>
 
+        {/* Account Limits */}
+        <section>
+          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mb-4">
+            Account Limits
+          </h2>
+          <div className="space-y-4 text-[var(--color-text-secondary)]">
+            <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg p-4">
+              <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-3">
+                Tree Limit
+              </h3>
+              <p className="mb-2">
+                Each account can have access to up to <strong>5 trees</strong> total. This includes:
+              </p>
+              <ul className="list-disc list-inside space-y-1 ml-2">
+                <li>Trees you create (as owner)</li>
+                <li>Trees you're invited to edit (as editor)</li>
+                <li>Trees you're invited to view (as viewer)</li>
+              </ul>
+              <p className="mt-2">
+                The limit counts all trees where you have any role. If you're invited to 5 trees, you've reached the limit even if you haven't created any yourself.
+              </p>
+            </div>
+            <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg p-4">
+              <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-3">
+                Storage Limit
+              </h3>
+              <p>
+                Each tree can store up to <strong>1GB</strong> of photos. This includes:
+              </p>
+              <ul className="list-disc list-inside space-y-1 ml-2 mt-2">
+                <li>Profile pictures for members</li>
+                <li>Additional photos uploaded for each member</li>
+              </ul>
+              <p className="mt-2">
+                If you reach the storage limit for a tree, you'll need to delete some photos before uploading new ones.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Need More Help */}
         <section>
           <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mb-4">
