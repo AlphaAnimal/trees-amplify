@@ -27,7 +27,7 @@ export default function EmptyState({ onCreateTree, disabled = false }: Props) {
         No trees yet
       </h2>
       <p className="text-[var(--color-text-secondary)] mb-8">
-        Create your first tree to start mapping out your ancestry, or ask
+        Create your first tree to start mapping out a family tree, or ask
         someone to share an existing tree with you.
       </p>
 

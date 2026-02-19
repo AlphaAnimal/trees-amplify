@@ -1,15 +1,4 @@
 import { defineAuth } from '@aws-amplify/backend';
-import { defineFunction } from '@aws-amplify/backend';
-
-/**
- * Lambda function to customize Cognito email messages
- * This function customizes the verification email to include Trees Lab branding
- */
-const emailCustomizer = defineFunction({
-  entry: './email-customizer.ts',
-  timeoutSeconds: 10,
-  memoryMB: 128,
-});
 
 /**
  * Define and configure your auth resource
@@ -17,9 +6,24 @@ const emailCustomizer = defineFunction({
  */
 export const auth = defineAuth({
   loginWith: {
-    email: true,
-  },
-  triggers: {
-    customMessage: emailCustomizer,
+    email: {
+      verificationEmailStyle: 'CODE',
+      verificationEmailSubject: 'Verify your Trees Lab account',
+      verificationEmailBody: (createCode) => {
+        const code = createCode();
+        return `
+Welcome to Trees Lab!
+
+The verification code to your new account is ${code}.
+
+This code will expire in 15 minutes.
+
+If you didn't create an account with Trees Lab, please ignore this email.
+
+Thank you,
+The Trees Lab Team
+        `.trim();
+      },
+    },
   },
 });
