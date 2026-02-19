@@ -18,6 +18,8 @@ function DashboardPage() {
   const { data, isLoading, isError, error } = useTrees()
 
   const trees = data?.trees ?? []
+  const MAX_TREES = 5
+  const hasReachedLimit = trees.length >= MAX_TREES
 
   return (
     <>
@@ -34,7 +36,10 @@ function DashboardPage() {
               </div>
             </div>
           </div>
-          <EmptyState onCreateTree={() => setShowCreateModal(true)} />
+          <EmptyState 
+            onCreateTree={() => setShowCreateModal(true)} 
+            disabled={hasReachedLimit}
+          />
         </div>
       ) : (
         // Normal constrained layout for content
@@ -50,12 +55,21 @@ function DashboardPage() {
               )}
             </div>
             {trees.length > 0 && (
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="px-4 py-2 bg-[var(--color-accent)] text-white text-sm font-medium rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors shadow-sm cursor-pointer"
-              >
-                Create Tree
-              </button>
+              <div className="flex flex-col items-end gap-1">
+                <button
+                  onClick={() => !hasReachedLimit && setShowCreateModal(true)}
+                  disabled={hasReachedLimit}
+                  className="px-4 py-2 bg-[var(--color-accent)] text-white text-sm font-medium rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--color-accent)]"
+                  title={hasReachedLimit ? `You have reached the limit of ${MAX_TREES} trees. You currently have access to ${trees.length} trees (as owner, editor, or viewer).` : undefined}
+                >
+                  Create Tree
+                </button>
+                {hasReachedLimit && (
+                  <p className="text-xs text-[var(--color-text-tertiary)] text-right max-w-[200px]">
+                    Tree limit reached ({trees.length}/{MAX_TREES})
+                  </p>
+                )}
+              </div>
             )}
           </div>
 

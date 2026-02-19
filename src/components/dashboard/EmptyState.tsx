@@ -1,4 +1,9 @@
-export default function EmptyState({ onCreateTree }: { onCreateTree: () => void }) {
+interface Props {
+  onCreateTree: () => void
+  disabled?: boolean
+}
+
+export default function EmptyState({ onCreateTree, disabled = false }: Props) {
   return (
     <div className="flex flex-col items-center justify-center py-20 w-full text-center">
       {/* Tree icon */}
@@ -26,12 +31,26 @@ export default function EmptyState({ onCreateTree }: { onCreateTree: () => void 
         someone to share an existing tree with you.
       </p>
 
-      <button
-        onClick={onCreateTree}
-        className="px-6 py-3 bg-[var(--color-accent)] text-white rounded-lg font-medium hover:bg-[var(--color-accent-hover)] transition-colors shadow-sm cursor-pointer"
-      >
-        Create Your First Tree
-      </button>
+      {disabled ? (
+        <div className="flex flex-col items-center gap-2">
+          <button
+            disabled
+            className="px-6 py-3 bg-[var(--color-accent)] text-white rounded-lg font-medium opacity-50 cursor-not-allowed transition-colors shadow-sm"
+          >
+            Create Your First Tree
+          </button>
+          <p className="text-sm text-[var(--color-text-tertiary)] max-w-md">
+            You have reached the limit of 5 trees. You currently have access to 5 trees (as owner, editor, or viewer).
+          </p>
+        </div>
+      ) : (
+        <button
+          onClick={onCreateTree}
+          className="px-6 py-3 bg-[var(--color-accent)] text-white rounded-lg font-medium hover:bg-[var(--color-accent-hover)] transition-colors shadow-sm cursor-pointer"
+        >
+          Create Your First Tree
+        </button>
+      )}
     </div>
   )
 }
