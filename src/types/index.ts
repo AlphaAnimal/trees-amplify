@@ -215,10 +215,3 @@ export interface AuthMeResponse {
   message: string
 }
 
-// ─── Generic API Error ───────────────────────────────────────────────────────
-
-export interface ApiError {
-  error: string
-  message?: string
-}
-

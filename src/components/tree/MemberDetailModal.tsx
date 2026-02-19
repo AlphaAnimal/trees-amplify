@@ -822,7 +822,7 @@ export default function MemberDetailModal({
           <div className="relative w-full h-full flex items-center justify-center p-4">
             <img
               src={photosUrls[lightboxIndex]}
-              alt={`Photo ${lightboxIndex + 1} of ${photosUrls.length} - ${member.name} ${member.surname}`}
+              alt={`Photo ${lightboxIndex + 1} of ${photosUrls.length}${member ? ` - ${member.name} ${member.surname}` : ''}`}
               className="max-w-full max-h-full object-contain"
             />
           </div>

@@ -26,19 +26,6 @@ export const amplifyTreesApi = {
     return data as unknown as AmplifyTree
   },
 
-  /** Update tree metadata. */
-  update: async (
-    id: string,
-    input: Partial<AmplifyTreeInput>,
-  ): Promise<AmplifyTree> => {
-    const { data, errors } = await client.models.Tree.update({ id, ...input })
-    if (errors?.length) {
-      throw new Error(errors.map((e) => e.message).join(', '))
-    }
-    if (!data) throw new Error('No data returned from tree update')
-    return data as unknown as AmplifyTree
-  },
-
   /** Delete tree metadata from Amplify DynamoDB. */
   delete: async (id: string): Promise<void> => {
     const { errors } = await client.models.Tree.delete({ id })
