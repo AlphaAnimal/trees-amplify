@@ -1,5 +1,3 @@
-import { fetchAuthSession } from 'aws-amplify/auth/server';
-
 // Configuration for your Flask service
 const FLASK_SERVICE_URL = process.env.FLASK_SERVICE_URL || 'https://your-flask-service-url.com';
 
