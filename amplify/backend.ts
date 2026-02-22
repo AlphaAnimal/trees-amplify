@@ -1,5 +1,5 @@
 import { defineBackend } from "@aws-amplify/backend";
-import { RemovalPolicy, Stack } from "aws-cdk-lib";
+import { RemovalPolicy } from "aws-cdk-lib";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import { auth } from "./auth/resource";
@@ -19,12 +19,17 @@ const backend = defineBackend({
 
 // --- Custom resources (DynamoDB + SSM params); one stack per Amplify env (dev/prod) ---
 const customStack = backend.createStack("custom-resources");
-const stackName = Stack.of(customStack).stackName;
+
+// Literal path for SSM params (required: token-based names break pipeline assembly).
+// Amplify sets AWS_APP_ID and AWS_BRANCH in the build; sandbox uses branch or 'sandbox'.
+const appId = process.env.AWS_APP_ID ?? "sandbox";
+const branch = process.env.AWS_BRANCH ?? "sandbox";
+const ssmParamPrefix = `/amplify/${appId}/${branch}`;
 
 const mediaBucket = backend.storage.resources.bucket;
 
 new ssm.StringParameter(customStack, "MediaBucketNameParam", {
-  parameterName: `/${stackName}/MediaBucketName`,
+  parameterName: `${ssmParamPrefix}/MediaBucketName`,
   stringValue: mediaBucket.bucketName,
 });
 
@@ -46,11 +51,11 @@ const treeEditorLocksTable = new dynamodb.Table(customStack, "TreeEditorLocks", 
 });
 
 new ssm.StringParameter(customStack, "TreeAclTableNameParam", {
-  parameterName: `/${stackName}/TreeAclTableName`,
+  parameterName: `${ssmParamPrefix}/TreeAclTableName`,
   stringValue: treeAclTable.tableName,
 });
 
 new ssm.StringParameter(customStack, "TreeEditorLocksTableNameParam", {
-  parameterName: `/${stackName}/TreeEditorLocksTableName`,
+  parameterName: `${ssmParamPrefix}/TreeEditorLocksTableName`,
   stringValue: treeEditorLocksTable.tableName,
 });
