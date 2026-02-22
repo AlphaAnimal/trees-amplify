@@ -83,72 +83,24 @@
   color: var(--color-accent-hover);
 }
 
-/* Error/Alert message styling for dark mode visibility */
-/* Target Amplify Alert components - Light mode */
+/* Error message: red text only, no box or borders */
 [class*="amplify-alert"],
 [class*="amplify-message"],
 [data-amplify-alert],
 [data-amplify-message],
-.amplify-alert {
-  background-color: rgba(239, 68, 68, 0.1) !important;
-  border: none !important;
-  border-left: 3px solid var(--color-error) !important;
-  border-radius: var(--radius-md) !important;
-  color: var(--color-error) !important;
-  box-shadow: none !important;
-}
-
-/* Target any error message containers in the Authenticator - Light mode */
+.amplify-alert,
 .amplify-authenticator [class*="error"],
 .amplify-authenticator [class*="alert"],
 .amplify-authenticator [class*="message"],
 .amplify-authenticator .amplify-alert {
-  background-color: rgba(239, 68, 68, 0.1) !important;
+  background: none !important;
+  background-color: transparent !important;
   border: none !important;
-  border-left: 3px solid var(--color-error) !important;
-  border-radius: var(--radius-md) !important;
-  color: var(--color-error) !important;
   box-shadow: none !important;
-}
-
-/* Dark mode error styling */
-@media (prefers-color-scheme: dark) {
-  [class*="amplify-alert"],
-  [class*="amplify-message"],
-  [data-amplify-alert],
-  [data-amplify-message],
-  .amplify-alert,
-  .amplify-authenticator [class*="error"],
-  .amplify-authenticator [class*="alert"],
-  .amplify-authenticator [class*="message"],
-  .amplify-authenticator .amplify-alert {
-    background-color: rgba(248, 113, 113, 0.12) !important;
-    border: none !important;
-    border-left: 3px solid var(--color-error) !important;
-    border-radius: var(--radius-md) !important;
-    color: var(--color-error) !important;
-    box-shadow: none !important;
-  }
-}
-
-[data-theme="dark"] [class*="amplify-alert"],
-[data-theme="dark"] [class*="amplify-message"],
-[data-theme="dark"] [data-amplify-alert],
-[data-theme="dark"] [data-amplify-message],
-[data-theme="dark"] .amplify-alert,
-[data-theme="dark"] .amplify-authenticator [class*="error"],
-[data-theme="dark"] .amplify-authenticator [class*="alert"],
-[data-theme="dark"] .amplify-authenticator [class*="message"],
-[data-theme="dark"] .amplify-authenticator .amplify-alert {
-  background-color: rgba(248, 113, 113, 0.12) !important;
-  border: none !important;
-  border-left: 3px solid var(--color-error) !important;
-  border-radius: var(--radius-md) !important;
   color: var(--color-error) !important;
-  box-shadow: none !important;
+  padding: 0 !important;
 }
 
-/* Ensure error text is always visible */
 [class*="amplify-alert"] *,
 [class*="amplify-message"] *,
 .amplify-alert *,
