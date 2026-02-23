@@ -27,10 +27,25 @@ const branch = process.env.AWS_BRANCH ?? "sandbox";
 const ssmParamPrefix = `/amplify/${appId}/${branch}`;
 
 const mediaBucket = backend.storage.resources.bucket;
+const userPool = backend.auth.resources.userPool;
+const dataCfn = backend.data.resources.cfnResources;
+// Single Tree model → single DynamoDB table; get its name from cfnTables
+const treeTableName = Object.values(dataCfn.cfnTables)[0]?.tableName;
+if (!treeTableName) throw new Error("Amplify Data Tree table not found");
 
 new ssm.StringParameter(customStack, "MediaBucketNameParam", {
   parameterName: `${ssmParamPrefix}/MediaBucketName`,
   stringValue: mediaBucket.bucketName,
+});
+
+new ssm.StringParameter(customStack, "UserPoolIdParam", {
+  parameterName: `${ssmParamPrefix}/UserPoolId`,
+  stringValue: userPool.userPoolId,
+});
+
+new ssm.StringParameter(customStack, "TreeTableNameParam", {
+  parameterName: `${ssmParamPrefix}/TreeTableName`,
+  stringValue: treeTableName,
 });
 
 // TreeAcl: treeId (PK) + userId (SK) — who can do what on each tree
