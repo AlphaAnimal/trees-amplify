@@ -28,10 +28,7 @@ const ssmParamPrefix = `/amplify/${appId}/${branch}`;
 
 const mediaBucket = backend.storage.resources.bucket;
 const userPool = backend.auth.resources.userPool;
-const dataCfn = backend.data.resources.cfnResources;
-// Single Tree model → single DynamoDB table when available (cfnTables may be empty in some pipeline contexts)
-const treeTable = Object.values(dataCfn.cfnTables)[0];
-const treeTableName = treeTable?.tableName ?? treeTable?.ref;
+const treeTable = backend.data.resources.tables["Tree"];
 
 new ssm.StringParameter(customStack, "MediaBucketNameParam", {
   parameterName: `${ssmParamPrefix}/MediaBucketName`,
@@ -43,12 +40,10 @@ new ssm.StringParameter(customStack, "UserPoolIdParam", {
   stringValue: userPool.userPoolId,
 });
 
-if (treeTableName) {
-  new ssm.StringParameter(customStack, "TreeTableNameParam", {
-    parameterName: `${ssmParamPrefix}/TreeTableName`,
-    stringValue: treeTableName,
-  });
-}
+new ssm.StringParameter(customStack, "TreeTableNameParam", {
+  parameterName: `${ssmParamPrefix}/TreeTableName`,
+  stringValue: treeTable.tableName,
+});
 
 // TreeAcl: treeId (PK) + userId (SK) — who can do what on each tree
 const treeAclTable = new dynamodb.Table(customStack, "TreeAcl", {
@@ -60,12 +55,16 @@ const treeAclTable = new dynamodb.Table(customStack, "TreeAcl", {
 });
 
 // TreeEditorLocks: one lock per treeId; TTL on expiresAt so locks auto-expire
-const treeEditorLocksTable = new dynamodb.Table(customStack, "TreeEditorLocks", {
-  partitionKey: { name: "treeId", type: dynamodb.AttributeType.STRING },
-  billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-  timeToLiveAttribute: "expiresAt",
-  removalPolicy: RemovalPolicy.RETAIN,
-});
+const treeEditorLocksTable = new dynamodb.Table(
+  customStack,
+  "TreeEditorLocks",
+  {
+    partitionKey: { name: "treeId", type: dynamodb.AttributeType.STRING },
+    billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    timeToLiveAttribute: "expiresAt",
+    removalPolicy: RemovalPolicy.RETAIN,
+  },
+);
 
 new ssm.StringParameter(customStack, "TreeAclTableNameParam", {
   parameterName: `${ssmParamPrefix}/TreeAclTableName`,
